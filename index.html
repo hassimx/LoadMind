@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LoadMind</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                Load<span>Mind</span>
+            </div>
+
+            <nav class="navigation">
+
+                <button class="nav-item active">
+                    Dashboard
+                </button>
+
+                <button class="nav-item">
+                    My Tasks
+                </button>
+
+                <button class="nav-item">
+                    Schedule
+                </button>
+
+                <button class="nav-item">
+                    Workload
+                </button>
+
+                <button class="nav-item">
+                    Settings
+                </button>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    System active
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <main class="main">
+
+            <header class="header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        PERSONAL WORKLOAD ASSISTANT
+                    </p>
+
+                    <h1>
+                        Good evening
+                    </h1>
+
+                    <p class="subtitle">
+                        Your workload overview for today
+                    </p>
+
+                </div>
+
+                <div class="date" id="today"></div>
+
+            </header>
+
+
+            <section class="stats-grid">
+
+                <div class="card stat-card">
+
+                    <div class="stat-header">
+                        <span>Workload</span>
+                        <span class="stat-label high">HIGH</span>
+                    </div>
+
+                    <div class="stat-value">
+                        72<span>%</span>
+                    </div>
+
+                    <div class="progress">
+                        <div
+                            class="progress-fill"
+                            style="width: 72%"
+                        ></div>
+                    </div>
+
+                    <p>
+                        High, but manageable
+                    </p>
+
+                </div>
+
+
+                <div class="card stat-card">
+
+                    <div class="stat-header">
+                        <span>Study time</span>
+                        <span class="stat-label">TODAY</span>
+                    </div>
+
+                    <div class="stat-value">
+                        4<span>h 20m</span>
+                    </div>
+
+                    <p>
+                        SAT · IELTS · School
+                    </p>
+
+                </div>
+
+
+                <div class="card stat-card">
+
+                    <div class="stat-header">
+                        <span>Daily balance</span>
+                        <span class="stat-label good">GOOD</span>
+                    </div>
+
+                    <div class="stat-value">
+                        8.1<span>/10</span>
+                    </div>
+
+                    <p>
+                        Recovery time available
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section class="content-grid">
+
+
+                <div class="card analysis-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <p class="section-label">
+                                NLP ENGINE
+                            </p>
+
+                            <h2>
+                                Analyze your notes
+                            </h2>
+
+                        </div>
+
+                        <div class="ai-indicator">
+                            NLP
+                        </div>
+
+                    </div>
+
+
+                    <p class="section-description">
+                        Describe your day, tasks, training or
+                        upcoming exams. LoadMind will identify
+                        workload factors and estimate your
+                        overload risk.
+                    </p>
+
+
+                    <textarea
+                        id="notes"
+                        placeholder="Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading..."
+                    ></textarea>
+
+
+                    <button
+                        class="primary-button"
+                        id="analyzeButton"
+                    >
+                        Analyze notes
+                    </button>
+
+
+                    <div
+                        class="analysis-result"
+                        id="analysisResult"
+                    >
+
+                        <div class="result-title">
+                            Analysis result
+                        </div>
+
+                        <div
+                            class="tags"
+                            id="tags"
+                        ></div>
+
+                        <p id="advice"></p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card schedule-card">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <p class="section-label">
+                                TODAY
+                            </p>
+
+                            <h2>
+                                Recommended plan
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="schedule">
+
+
+                        <div class="task">
+
+                            <div class="time">
+                                09:00
+                            </div>
+
+                            <div class="task-line"></div>
+
+                            <div class="task-info">
+
+                                <strong>
+                                    SAT Math
+                                </strong>
+
+                                <small>
+                                    50 min · High concentration
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task">
+
+                            <div class="time">
+                                10:00
+                            </div>
+
+                            <div class="task-line"></div>
+
+                            <div class="task-info">
+
+                                <strong>
+                                    Break
+                                </strong>
+
+                                <small>
+                                    20 min · Recovery
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task">
+
+                            <div class="time">
+                                10:20
+                            </div>
+
+                            <div class="task-line"></div>
+
+                            <div class="task-info">
+
+                                <strong>
+                                    IELTS Reading
+                                </strong>
+
+                                <small>
+                                    45 min · Medium load
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task">
+
+                            <div class="time">
+                                17:00
+                            </div>
+
+                            <div class="task-line"></div>
+
+                            <div class="task-info">
+
+                                <strong>
+                                    Volleyball
+                                </strong>
+
+                                <small>
+                                    2 h · Physical load
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task">
+
+                            <div class="time">
+                                20:00
+                            </div>
+
+                            <div class="task-line"></div>
+
+                            <div class="task-info">
+
+                                <strong>
+                                    Light review
+                                </strong>
+
+                                <small>
+                                    25 min · No new topics
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="warning">
+
+                        <div class="warning-title">
+                            HIGH LOAD
+                        </div>
+
+                        <p>
+                            Intensive SAT topics are not recommended
+                            immediately after physical training.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <section class="card overload-card">
+
+                <div class="overload-header">
+
+                    <div>
+
+                        <p class="section-label">
+                            LOAD ANALYTICS
+                        </p>
+
+                        <h2>
+                            Overload index
+                        </h2>
+
+                    </div>
+
+                    <div
+                        class="score"
+                        id="score"
+                    >
+                        34
+                    </div>
+
+                </div>
+
+
+                <p class="section-description">
+                    0–100 scale. A higher score indicates
+                    increased overload risk.
+                </p>
+
+
+                <div class="large-progress">
+
+                    <div
+                        class="large-progress-fill"
+                        id="scoreBar"
+                        style="width: 34%"
+                    ></div>
+
+                </div>
+
+
+                <div class="scale">
+
+                    <span>LOW</span>
+                    <span>NORMAL</span>
+                    <span>HIGH</span>
+                    <span>CRITICAL</span>
+
+                </div>
+
+            </section>
+
+
+            <footer class="footer">
+
+                <span>
+                    LoadMind
+                </span>
+
+                <span>
+                    Personal workload optimization system
+                </span>
+
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <script src="js/script.js"></script>
+
+</body>
+</html>
