@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LoadMind</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                Load<span>Mind</span>
+            </div>
+
+            <nav class="navigation">
+
+                <button class="nav-item active" data-view="dashboard">Dashboard</button>
+
+                <button class="nav-item" data-view="tasks">My Tasks</button>
+
+                <button class="nav-item" data-view="schedule">Schedule</button>
+
+                <button class="nav-item" data-view="workload">Workload</button>
+
+                <button class="nav-item" data-view="settings">Settings</button>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    System active
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <main class="main">
+
+            <header class="header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        PERSONAL WORKLOAD ASSISTANT
+                    </p>
+
+                    <h1 id="greeting">Good evening</h1>
+
+                    <p class="subtitle">
+                        Your workload overview for today
+                    </p>
+
+                </div>
+
+                <div class="date" id="today"></div>
+
+            </header>
+
+
+            <section class="stats-grid" data-views="dashboard workload">
+                <div class="card stat-card">
+                    <div class="stat-header"><span>Workload</span><span class="stat-label" id="workloadLabel"></span></div>
+                    <div class="stat-value"><strong id="workloadValue">0</strong><span>%</span></div>
+                    <div class="progress"><div class="progress-fill" id="workloadBar"></div></div>
+                    <p id="workloadNote"></p>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header"><span>Study time</span><span class="stat-label">TODAY</span></div>
+                    <div class="stat-value"><strong id="studyValue">0</strong><span id="studyUnit"></span></div>
+                    <p id="studyNote"></p>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header"><span>Daily balance</span><span class="stat-label" id="balanceLabel"></span></div>
+                    <div class="stat-value"><strong id="balanceValue">0</strong><span>/10</span></div>
+                    <p id="balanceNote"></p>
+                </div>
+            </section>
+
+
+            <section class="content-grid">
+
+
+                <div class="card analysis-card" data-views="dashboard workload">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <p class="section-label">
+                                NLP ENGINE
+                            </p>
+
+                            <h2>
+                                Analyze your notes
+                            </h2>
+
+                        </div>
+
+                        <div class="ai-indicator">
+                            NLP
+                        </div>
+
+                    </div>
+
+
+                    <p class="section-description">
+                        Describe your day, tasks, training or
+                        upcoming exams. LoadMind will identify
+                        workload factors and estimate your
+                        overload risk.
+                    </p>
+
+
+                    <textarea
+                        id="notes"
+                        placeholder="Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading..."
+                    ></textarea>
+
+
+                    <button
+                        class="primary-button"
+                        id="analyzeButton"
+                    >
+                        Analyze notes
+                    </button>
+
+
+                    <div
+                        class="analysis-result"
+                        id="analysisResult"
+                    >
+
+                        <div class="result-title">
+                            Analysis result
+                        </div>
+
+                        <div
+                            class="tags"
+                            id="tags"
+                        ></div>
+
+                        <p id="advice"></p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card schedule-card" data-views="dashboard schedule">
+
+                    <div class="section-header">
+
+                        <div>
+
+                            <p class="section-label">
+                                TODAY
+                            </p>
+
+                            <h2>
+                                Recommended plan
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="schedule" id="schedule"></div>
+
+
+                    <div class="warning">
+
+                        <div class="warning-title" id="warningTitle"></div>
+
+                        <p id="warningText"></p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <section class="card overload-card" data-views="dashboard workload">
+
+                <div class="overload-header">
+
+                    <div>
+
+                        <p class="section-label">
+                            LOAD ANALYTICS
+                        </p>
+
+                        <h2>
+                            Overload index
+                        </h2>
+
+                    </div>
+
+                    <div
+                        class="score"
+                        id="score"
+                    >
+                        34
+                    </div>
+
+                </div>
+
+
+                <p class="section-description">
+                    0–100 scale. A higher score indicates
+                    increased overload risk.
+                </p>
+
+
+                <div class="large-progress">
+
+                    <div
+                        class="large-progress-fill"
+                        id="scoreBar"
+                        style="width: 34%"
+                    ></div>
+
+                </div>
+
+
+                <div class="tags" id="breakdown" style="margin-top:16px"></div>
+
+                <div class="scale">
+
+                    <span>LOW</span>
+                    <span>NORMAL</span>
+                    <span>HIGH</span>
+                    <span>CRITICAL</span>
+
+                </div>
+
+            </section>
+
+
+            <section class="card" data-views="tasks">
+                <div class="section-header"><div><p class="section-label">TODAY</p><h2>My tasks</h2></div></div>
+                <p class="section-description">Add what you plan to do today. The plan, workload and overload index update automatically.</p>
+                <form class="form-row" id="taskForm">
+                    <input id="taskTitle" type="text" placeholder="Task, e.g. SAT Reading" autocomplete="off">
+                    <input id="taskMinutes" type="number" min="5" max="600" step="5" value="45" title="Minutes">
+                    <select id="taskType">
+                        <option value="exam">Exam prep</option>
+                        <option value="study">Study</option>
+                        <option value="physical">Physical</option>
+                        <option value="light">Light</option>
+                    </select>
+                    <button class="primary-button" type="submit" style="margin-top:0">Add task</button>
+                </form>
+                <div id="taskList"></div>
+            </section>
+
+            <section class="card" data-views="settings">
+                <div class="section-header"><div><p class="section-label">PREFERENCES</p><h2>Settings</h2></div></div>
+                <label class="setting">Your name <input id="setName" type="text" placeholder="Optional"></label>
+                <label class="setting">Day starts at <input id="setStart" type="time" value="09:00"></label>
+                <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
+                <div class="setting"><span>Data is stored locally in this browser.</span><button class="primary-button" id="resetButton" style="margin-top:0">Reset all data</button></div>
+            </section>
+
+            <footer class="footer">
+
+                <span>
+                    LoadMind
+                </span>
+
+                <span>
+                    Personal workload optimization system
+                </span>
+
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <script src="js/script.js"></script>
+
+</body>
+</html>
