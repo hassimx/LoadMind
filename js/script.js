@@ -2,8 +2,9 @@ const $ = id => document.getElementById(id);
 const KEY = "loadmind.v1";
 const WEIGHT = { exam: 1.3, study: 1.0, physical: 1.2, light: 0.4 };
 const TYPE_LABEL = { exam: "High concentration", study: "Medium load", physical: "Physical load", light: "Light load" };
-const LEVELS = ["LOW", "NORMAL", "HIGH", "CRITICAL"];
-
+const TYPE_NAME = { exam: "Exam prep", study: "Study", physical: "Physical", light: "Light" };
+const LEVELS = ["Low", "Normal", "High", "Critical"];
+ 
 const fresh = () => ({
     settings: { name: "", start: "09:00", capacity: 8 },
     tasks: [
@@ -14,7 +15,7 @@ const fresh = () => ({
     ],
     nextId: 5, notes: "", notesScore: 0, categories: []
 });
-
+ 
 function load() {
     try {
         const raw = JSON.parse(localStorage.getItem(KEY));
@@ -25,58 +26,58 @@ function load() {
     return fresh();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-
+ 
 let state = load();
 let view = "dashboard";
-
+ 
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 const levelOf = v => (v < 25 ? 0 : v < 50 ? 1 : v < 75 ? 2 : 3);
 const dur = m => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}` : `${m} min`);
 const fmt = t => `${String(Math.floor(t / 60) % 24).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
-
-
+ 
+ 
 // ---------- NLP: keyword analysis (EN + RU) ----------
 // "word*" = prefix match (stems), plain "word" = whole word only
-
+ 
 const categories = {
-    academic: { name: "ACADEMIC", points: 20, keywords: [
+    academic: { name: "academic", points: 20, keywords: [
         "study*", "school", "homework", "math*", "physics", "chemistry", "english", "reading", "writing", "lesson*", "assignment*",
         "школ*", "домашк*", "домашн*", "математик*", "физик*", "хими*", "англий*", "чтени*", "урок*", "занимал*", "занятия*"
     ] },
-    exam: { name: "EXAM", points: 20, keywords: [
+    exam: { name: "exam", points: 20, keywords: [
         "sat", "ielts", "exam*", "test*", "deadline*", "score", "practice test",
         "экзамен*", "тест*", "дедлайн*", "сдать"
     ] },
-    sport: { name: "PHYSICAL", points: 15, keywords: [
+    sport: { name: "physical", points: 15, keywords: [
         "volleyball", "training*", "workout*", "gym", "running", "sport*", "match",
         "волейбол*", "трениров*", "спортзал*", "бегал*", "пробеж*", "матч*"
     ] },
-    fatigue: { name: "FATIGUE", points: 25, keywords: [
+    fatigue: { name: "fatigue", points: 25, keywords: [
         "tired", "exhausted", "fatigue", "stress*", "overwhelmed", "burnout", "no energy", "can't focus", "cannot focus",
         "устал*", "устав*", "вымот*", "стресс*", "выгор*", "нет сил", "не могу сосредоточ*"
     ] },
-    rest: { name: "RECOVERY", points: -5, keywords: [
+    rest: { name: "recovery", points: -5, keywords: [
         "rest", "sleep*", "break*", "recovery", "relax*",
         "отдых*", "отдохн*", "спал*", "поспал*", "сон", "перерыв*", "расслаб*"
     ] }
 };
-
+ 
 const TASK_WORDS = ["need to", "have to", "must", "finish", "complete", "tomorrow", "deadline*",
     "надо", "нужно", "должн*", "закончить", "доделать", "сдать", "завтра"];
-
+ 
 const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
+ 
 function matches(text, kw) {
     const stem = kw.endsWith("*");
     const body = escapeRe(stem ? kw.slice(0, -1) : kw);
     return new RegExp(`(?<![\\p{L}\\p{N}])${body}${stem ? "" : "(?![\\p{L}\\p{N}])"}`, "u").test(text);
 }
-
+ 
 function analyzeText(text) {
     const t = text.toLowerCase();
     let score = 10;
     const detectedCategories = [];
-
+ 
     for (const key in categories) {
         const c = categories[key];
         if (c.keywords.some(kw => matches(t, kw))) {
@@ -84,33 +85,33 @@ function analyzeText(text) {
             score += c.points;
         }
     }
-
+ 
     const taskCount = TASK_WORDS.filter(w => matches(t, w)).length;
     score += Math.min(taskCount * 3, 15);
-
+ 
     return { score: clamp(score), detectedCategories };
 }
-
+ 
 function generateAdvice(score) {
-    if (score >= 80) return "Your workload is critical. Focus only on the highest-priority tasks, reduce intensive study sessions and add recovery time.";
-    if (score >= 60) return "Your workload is high. Avoid stacking several demanding tasks together and schedule recovery periods between intensive activities.";
-    if (score >= 40) return "Your workload is moderate. Keep the planned schedule, but alternate demanding tasks with shorter recovery periods.";
-    return "Your workload appears manageable. You can keep the current study plan and adjust it if your energy level changes.";
+    if (score >= 75) return "Too much for one day. Keep the one or two things that matter most and move the rest.";
+    if (score >= 50) return "Heavy day. Don't put two hard tasks back to back, leave a break between them.";
+    if (score >= 25) return "Fine as it is. Just keep breaks between the hard blocks.";
+    return "Light day. Nothing to change.";
 }
-
-
+ 
+ 
 // ---------- metrics & plan ----------
-
+ 
 function metrics() {
     const open = state.tasks.filter(t => !t.done);
     const weighted = open.reduce((s, t) => s + t.minutes * WEIGHT[t.type], 0);
     const workload = clamp(Math.round(weighted / (state.settings.capacity * 60) * 100));
     const studyMin = state.tasks.filter(t => t.type === "exam" || t.type === "study").reduce((s, t) => s + t.minutes, 0);
-    const index = clamp(Math.round(workload * 0.6 + state.notesScore * 0.4));
+    const index = state.notes ? clamp(Math.round(workload * 0.6 + state.notesScore * 0.4)) : workload;
     const balance = clamp(10 - index / 12.5, 0, 10);
     return { workload, studyMin, index, balance };
 }
-
+ 
 function buildPlan() {
     const order = { exam: 0, study: 0, physical: 1, light: 2 }; // focus first, sport after, light review last
     const open = state.tasks.filter(t => !t.done).sort((a, b) => order[a.type] - order[b.type]);
@@ -121,92 +122,98 @@ function buildPlan() {
         out.push({ time: fmt(t), title: task.title, meta: `${dur(task.minutes)} · ${TYPE_LABEL[task.type]}` });
         t += task.minutes;
         if (open[i + 1] && (task.type === "exam" || task.type === "study") && task.minutes >= 40) {
-            out.push({ time: fmt(t), title: "Break", meta: "15 min · Recovery" });
+            out.push({ time: fmt(t), title: "Break", meta: "15 min", rest: true });
             t += 15;
         }
     });
     return out;
 }
-
-
+ 
+ 
 // ---------- render ----------
-
+ 
 function tag(text) {
     const s = document.createElement("span");
     s.className = "tag";
     s.textContent = text;
     return s;
 }
-
+ 
 function render() {
     const { workload, studyMin, index, balance } = metrics();
-    const hour = new Date().getHours();
-    const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-    $("greeting").textContent = state.settings.name ? `${greet}, ${state.settings.name}` : greet;
-
+    $("greeting").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    const open = state.tasks.filter(t => !t.done);
+    const openMin = open.reduce((sum, t) => sum + t.minutes, 0);
+    const summary = open.length ? `${open.length} open · ${dur(openMin)} planned` : "Nothing open";
+    $("summary").textContent = state.settings.name ? `${state.settings.name} · ${summary}` : summary;
+ 
     // stats
     const wl = levelOf(workload);
     $("workloadValue").textContent = workload;
     $("workloadBar").style.width = `${workload}%`;
     $("workloadLabel").textContent = LEVELS[wl];
     $("workloadLabel").className = "stat-label" + (wl >= 2 ? " high" : " good");
+    $("workloadBar").classList.toggle("high", wl >= 2);
     $("workloadNote").textContent = ["Light day", "Balanced", "High, but manageable", "Too much for one day"][wl];
-
+ 
     $("studyValue").textContent = studyMin >= 60 ? Math.floor(studyMin / 60) : studyMin;
-    $("studyUnit").textContent = studyMin >= 60 ? ` h ${studyMin % 60}m` : " min";
+    $("studyUnit").textContent = studyMin >= 60 ? ` h${studyMin % 60 ? ` ${studyMin % 60} min` : ""}` : " min";
     const titles = state.tasks.filter(t => t.type === "exam" || t.type === "study").map(t => t.title);
     $("studyNote").textContent = titles.length ? titles.join(" · ") : "No study tasks yet";
-
+ 
     $("balanceValue").textContent = balance.toFixed(1);
-    $("balanceLabel").textContent = balance >= 7 ? "GOOD" : balance >= 4 ? "OK" : "LOW";
+    $("balanceLabel").textContent = balance >= 7 ? "Good" : balance >= 4 ? "OK" : "Low";
     $("balanceLabel").className = "stat-label" + (balance >= 7 ? " good" : balance < 4 ? " high" : "");
     $("balanceNote").textContent = balance >= 7 ? "Recovery time available" : "Add recovery time";
-
+ 
     // overload index
     $("score").textContent = index;
     $("scoreBar").style.width = `${index}%`;
+    $("scoreBar").classList.toggle("high", index >= 50);
+    $("score").classList.toggle("high", index >= 50);
     document.querySelectorAll(".scale span").forEach((s, i) => s.classList.toggle("active", i === levelOf(index)));
     const byType = {};
     state.tasks.filter(t => !t.done).forEach(t => { byType[t.type] = (byType[t.type] || 0) + t.minutes; });
-    $("breakdown").replaceChildren(...Object.entries(byType).map(([k, v]) => tag(`${k.toUpperCase()} · ${dur(v)}`)));
-
+    $("breakdown").replaceChildren(...Object.entries(byType).map(([k, v]) => tag(`${TYPE_NAME[k]} · ${dur(v)}`)));
+ 
     // plan
     const plan = buildPlan();
     $("schedule").replaceChildren(...plan.map(p => {
         const row = document.createElement("div");
-        row.className = "task";
-        row.innerHTML = `<div class="time"></div><div class="task-line"></div><div class="task-info"><strong></strong><small></small></div>`;
+        row.className = "task" + (p.rest ? " break" : "");
+        row.innerHTML = `<div class="time"></div><div class="task-info"><strong></strong><small></small></div>`;
         row.querySelector(".time").textContent = p.time;
         row.querySelector("strong").textContent = p.title;
         row.querySelector("small").textContent = p.meta;
         return row;
     }));
     if (!plan.length) $("schedule").innerHTML = `<p class="empty">Nothing planned. Add tasks in My Tasks.</p>`;
-    $("warningTitle").textContent = `${LEVELS[levelOf(index)]} LOAD`;
+    $("warning").dataset.level = levelOf(index);
+    $("warningTitle").textContent = `${LEVELS[levelOf(index)]} load`;
     $("warningText").textContent = generateAdvice(index);
-
+ 
     // tasks list
     $("taskList").replaceChildren(...state.tasks.map(t => {
         const row = document.createElement("div");
         row.className = "task-row" + (t.done ? " done" : "");
-        row.innerHTML = `<input type="checkbox" data-id="${t.id}"><div class="task-name"><span></span><br><small></small></div><button class="icon-btn" data-del="${t.id}" title="Delete">✕</button>`;
+        row.innerHTML = `<input type="checkbox" data-id="${t.id}"><div class="task-name"><span></span><small></small></div><button class="icon-btn" data-del="${t.id}" title="Delete" aria-label="Delete task">×</button>`;
         row.querySelector("input").checked = t.done;
         row.querySelector("span").textContent = t.title;
         row.querySelector("small").textContent = `${dur(t.minutes)} · ${TYPE_LABEL[t.type]}`;
         return row;
     }));
     if (!state.tasks.length) $("taskList").innerHTML = `<p class="empty">No tasks yet.</p>`;
-
+ 
     // saved analysis
     if (state.notes) {
-        $("tags").replaceChildren(...(state.categories.length ? state.categories : ["GENERAL"]).map(tag));
+        $("tags").replaceChildren(...(state.categories.length ? state.categories : ["general"]).map(tag));
         $("advice").textContent = generateAdvice(state.notesScore);
         $("analysisResult").style.display = "block";
     } else {
         $("analysisResult").style.display = "none";
     }
 }
-
+ 
 function showView(v) {
     view = v;
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === v));
@@ -216,12 +223,12 @@ function showView(v) {
     grid.hidden = visible === 0;
     grid.style.gridTemplateColumns = visible === 1 ? "1fr" : "";
 }
-
-
+ 
+ 
 // ---------- events ----------
-
+ 
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
-
+ 
 $("analyzeButton").addEventListener("click", () => {
     const text = $("notes").value.trim();
     if (!text) { $("notes").focus(); return; }
@@ -232,7 +239,7 @@ $("analyzeButton").addEventListener("click", () => {
     save();
     render();
 });
-
+ 
 $("taskForm").addEventListener("submit", e => {
     e.preventDefault();
     const title = $("taskTitle").value.trim();
@@ -243,7 +250,7 @@ $("taskForm").addEventListener("submit", e => {
     save();
     render();
 });
-
+ 
 $("taskList").addEventListener("click", e => {
     const del = e.target.closest("[data-del]");
     if (del) {
@@ -254,7 +261,7 @@ $("taskList").addEventListener("click", e => {
         if (task) { task.done = e.target.checked; save(); render(); }
     }
 });
-
+ 
 $("setName").addEventListener("input", e => { state.settings.name = e.target.value.trim(); save(); render(); });
 $("setStart").addEventListener("change", e => { state.settings.start = e.target.value || "09:00"; save(); render(); });
 $("setCapacity").addEventListener("change", e => {
@@ -268,12 +275,11 @@ $("resetButton").addEventListener("click", () => {
     save();
     init();
 });
-
-
+ 
+ 
 // ---------- init ----------
-
+ 
 function init() {
-    $("today").textContent = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
     $("notes").value = state.notes;
     $("setName").value = state.settings.name;
     $("setStart").value = state.settings.start;
@@ -281,5 +287,5 @@ function init() {
     render();
     showView(view);
 }
-
+ 
 init();
