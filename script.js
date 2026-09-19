@@ -280,10 +280,10 @@ $("resetButton").addEventListener("click", () => {
 // ---------- appearance: theme + accent color ----------
 
 const PRESETS = [
-    { name: "Teal", hex: "#12796b" },
+    { name: "Raspberry", hex: "#b83280" },
     { name: "Blue", hex: "#2f5fd0" },
+    { name: "Teal", hex: "#12796b" },
     { name: "Violet", hex: "#6d4fd0" },
-    { name: "Magenta", hex: "#b83280" },
     { name: "Red", hex: "#c8402a" },
     { name: "Gold", hex: "#b7791f" }
 ];

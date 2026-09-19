@@ -18,7 +18,7 @@
     --good: #3d6b4a;
 
     /* set from the head script in index.html; this is only the fallback */
-    --accent: #12796b;
+    --accent: #b83280;
 
     /* fonts: change these three lines to change the whole look */
     --display: "Unbounded", "Trebuchet MS", system-ui, sans-serif;
