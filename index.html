@@ -11,8 +11,89 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Unbounded:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+
+    <script>
+    /* Theme + accent color. Runs in <head> so the page never flashes the wrong theme. */
+    (function () {
+        var KEY = "loadmind.ui";
+        var DEFAULT_ACCENT = "#12796b";
+        var BG = { light: "#f4f0e8", dark: "#151513" }; /* keep in sync with --paper in style.css */
+        var ui = {};
+        try { ui = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+
+        function hexToRgb(h) {
+            h = h.replace("#", "");
+            var n = parseInt(h, 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        }
+        function lum(c) {
+            var a = c.map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+            return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        }
+        function contrast(a, b) {
+            var x = lum(a), y = lum(b);
+            return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+        }
+        function rgbToHsl(c) {
+            var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255;
+            var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min, h = 0, s = 0;
+            if (d) {
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+            }
+            return { h: h, s: s * 100, l: l * 100 };
+        }
+        function hslToHex(h, s, l) {
+            s /= 100; l /= 100;
+            var a = s * Math.min(l, 1 - l);
+            function f(n) {
+                var k = (n + h / 30) % 12;
+                return Math.round((l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)))) * 255);
+            }
+            return "#" + [f(0), f(8), f(4)].map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join("");
+        }
+        /* Any color the user picks gets nudged until it is readable on the current background. */
+        function readable(hex, theme) {
+            var bg = hexToRgb(BG[theme]);
+            var hsl = rgbToHsl(hexToRgb(hex));
+            var step = theme === "dark" ? 2 : -2;
+            var l = hsl.l, out = hex;
+            for (var i = 0; i < 60; i++) {
+                out = hslToHex(hsl.h, hsl.s, l);
+                if (contrast(hexToRgb(out), bg) >= 4.5) return out;
+                l += step;
+                if (l < 0 || l > 100) break;
+            }
+            return out;
+        }
+
+        var current = {};
+        function apply() {
+            var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = ui.theme === "dark" || ui.theme === "light" ? ui.theme : (systemDark ? "dark" : "light");
+            var accent = /^#[0-9a-f]{6}$/i.test(ui.accent || "") ? ui.accent : DEFAULT_ACCENT;
+            var root = document.documentElement;
+            root.setAttribute("data-theme", theme);
+            root.style.setProperty("--accent", readable(accent, theme));
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute("content", BG[theme]);
+            current = { theme: theme, accent: accent };
+        }
+        function save() { try { localStorage.setItem(KEY, JSON.stringify(ui)); } catch (e) {} }
+
+        window.LoadMindTheme = {
+            get: function () { return current; },
+            setTheme: function (t) { ui.theme = t; save(); apply(); },
+            setAccent: function (c) { ui.accent = c; save(); apply(); }
+        };
+        apply();
+    })();
+    </script>
 </head>
 
 <body>
@@ -28,6 +109,11 @@
                 <button class="nav-item" data-view="workload">Workload</button>
                 <button class="nav-item" data-view="settings">Settings</button>
             </nav>
+
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
+                <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
         </div>
     </header>
 
@@ -138,7 +224,14 @@
             <label class="setting">Your name <input id="setName" type="text" placeholder="Optional"></label>
             <label class="setting">Day starts at <input id="setStart" type="time" value="09:00"></label>
             <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
-            <div class="setting"><span>Everything is stored in this browser only.</span><button class="secondary-button" id="resetButton">Reset all data</button></div>
+            <div class="setting">
+                <span>Accent color</span>
+                <div class="accent-controls">
+                    <div class="swatches" id="swatches" role="group" aria-label="Preset colors"></div>
+                    <input id="accentPicker" type="color" aria-label="Custom accent color" title="Pick any color">
+                </div>
+            </div>
+            <div class="setting"><span>Everything is stored in this browser only.</span><button class="secondary-button" id="resetButton">Reset tasks and notes</button></div>
         </section>
 
     </main>
