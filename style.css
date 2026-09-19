@@ -14,8 +14,9 @@
     --ink-3: #6f6b62;
     --rule: #cfc8b9;
 
-    --warn: #b3261e;   /* high load, delete */
-    --good: #3d6b4a;
+    /* high load, "good" and delete follow the accent color too; the text labels say which is which */
+    --warn: var(--accent);
+    --good: var(--accent);
 
     /* set from the head script in index.html; this is only the fallback */
     --accent: #b83280;
@@ -36,9 +37,6 @@
     --ink-2: #b8b2a4;
     --ink-3: #9a9486;
     --rule: #3a3831;
-
-    --warn: #ff7b6b;
-    --good: #7bc98f;
 }
 
 [hidden] { display: none !important; }
@@ -202,7 +200,7 @@ button, input, select, textarea { font-family: inherit; color: inherit; }
     color: var(--ink-3);
 }
 
-.stat-label.high { color: var(--warn); }
+.stat-label.high { color: var(--warn); font-weight: 600; }
 .stat-label.good { color: var(--good); }
 
 .stat-value {
