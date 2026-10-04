@@ -18,7 +18,7 @@
     /* Theme + accent color. Runs in <head> so the page never flashes the wrong theme. */
     (function () {
         var KEY = "loadmind.ui";
-        var DEFAULT_ACCENT = "#b83280";
+        var DEFAULT_ACCENT = "#b9a7f5";
         var BG = { light: "#f4f0e8", dark: "#151513" }; /* keep in sync with --paper in style.css */
         var ui = {};
         try { ui = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
@@ -75,7 +75,7 @@
         var current = {};
         function apply() {
             var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            var theme = ui.theme === "dark" || ui.theme === "light" ? ui.theme : (systemDark ? "dark" : "light");
+            var theme = ui.theme === "dark" || ui.theme === "light" ? ui.theme : "dark";
             var accent = /^#[0-9a-f]{6}$/i.test(ui.accent || "") ? ui.accent : DEFAULT_ACCENT;
             var root = document.documentElement;
             root.setAttribute("data-theme", theme);
@@ -259,7 +259,7 @@
             <label class="setting">AI API key <input id="setKey" type="password" autocomplete="off" placeholder="Stays in this browser only"></label>
             <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
             <label class="setting">Background
-                <select id="setBg"><option value="glow">Glow</option><option value="lines">Lines</option><option value="dots">Dots</option><option value="off">Off</option></select>
+                <select id="setBg"><option value="sparkles">Sparkles</option><option value="plus">Plus signs</option><option value="lines">Lines</option><option value="off">Off</option></select>
             </label>
             <label class="setting">Cursor
                 <select id="setCur"><option value="custom">Custom</option><option value="standard">Standard</option></select>

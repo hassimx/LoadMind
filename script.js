@@ -494,12 +494,12 @@ $("resetButton").addEventListener("click", () => {
 // ---------- appearance: theme + accent color ----------
 
 const PRESETS = [
-    { name: "Raspberry", hex: "#b83280" },
-    { name: "Blue", hex: "#2f5fd0" },
-    { name: "Teal", hex: "#12796b" },
-    { name: "Violet", hex: "#6d4fd0" },
-    { name: "Red", hex: "#c8402a" },
-    { name: "Gold", hex: "#b7791f" }
+    { name: "Lavender", hex: "#b9a7f5" },
+    { name: "Rose", hex: "#f2a7c3" },
+    { name: "Peach", hex: "#f5b49a" },
+    { name: "Butter", hex: "#ecd68a" },
+    { name: "Mint", hex: "#9fddc0" },
+    { name: "Sky", hex: "#9cc7f5" }
 ];
 
 function syncAppearance() {

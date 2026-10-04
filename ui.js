@@ -3,7 +3,6 @@
     const $ = s => document.querySelector(s);
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const root = document.documentElement;
-    try { if (!JSON.parse(localStorage.getItem("loadmind.ui") || "{}").theme) root.dataset.theme = "dark"; } catch (e) { root.dataset.theme = "dark"; }
 
     /* ---------- language (EN / RU) ---------- */
     const RU = {
@@ -25,7 +24,7 @@
         "Light day": "Лёгкий день", "Balanced": "Сбалансировано", "High, but manageable": "Много, но терпимо", "Too much for one day": "Слишком много для одного дня",
         "Good": "Хорошо", "OK": "Нормально", "Recovery time available": "Есть время на отдых", "Add recovery time": "Добавь время на отдых",
         "academic": "учёба", "exam": "экзамен", "physical": "спорт", "fatigue": "усталость", "recovery": "отдых",
-        "Background": "Фон", "Glow": "Свечение", "Lines": "Линии", "Dots": "Точки", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
+        "Background": "Фон", "Sparkles": "Звёздочки", "Plus signs": "Плюсики", "Lines": "Линии", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
         "Language": "Язык", "AI provider": "ИИ-провайдер", "Everything is stored in this browser only": "Всё хранится только в этом браузере",
         "Break": "Перерыв", "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка",
         "Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. The AI only advises: the schedule itself is built by rules.": "Читает задачи, дедлайны, пиковое время и заметки и даёт короткий совет. ИИ только советует, расписание строится по правилам.",
@@ -116,7 +115,7 @@
 
     /* ---------- background styles (Settings -> Background) ---------- */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = look.bg || "glow"; look.cur = look.cur || "custom";
+    look.bg = ["sparkles", "plus", "lines", "off"].includes(look.bg) ? look.bg : "sparkles"; look.cur = look.cur || "custom";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();
@@ -126,7 +125,7 @@
     sc.onchange = () => { look.cur = sc.value; saveLook(); applyCur(); };
 
     const cv = $("#dots"), cx = cv.getContext("2d");
-    let W, H, rgb = "184,50,128", fr = 0;
+    let W, H, rgb = "185,167,245", fr = 0; const stars = [];
     function size() { const d = devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); }
     addEventListener("resize", size); size();
     function accent() { const h = getComputedStyle(root).getPropertyValue("--accent").trim().replace("#", ""); if (h.length === 6) rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)).join(","); }
@@ -135,11 +134,17 @@
         sx += (mx - sx) * .1; sy += (my - sy) * .1;
         cx.clearRect(0, 0, W, H);
         const dark = root.dataset.theme === "dark", ink = dark ? "233,230,223" : "28,27,24";
-        if (look.bg === "glow") {
-            [[sx, sy, 520, .20], [W * (.25 + .15 * Math.sin(t * .00021)), H * (.35 + .2 * Math.cos(t * .00017)), 620, .12], [W * (.8 + .1 * Math.cos(t * .00019)), H * (.7 + .15 * Math.sin(t * .00023)), 560, .10]].forEach(([x, y, r, a]) => {
-                if (x < -900) return;
-                const g = cx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
-                cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+        if (look.bg === "sparkles" || look.bg === "plus") {
+            if (!stars.length) for (let i = 0; i < 46; i++) stars.push({ x: Math.random(), y: Math.random(), s: 5 + Math.random() * 13, p: Math.random() * 6.3, v: .4 + Math.random() * .9 });
+            stars.forEach(o => {
+                let x = ((o.x * W + t * .004 * o.v) % (W + 40)) - 20, y = ((o.y * H - t * .006 * o.v) % (H + 40) + H + 40) % (H + 40) - 20;
+                const dx = x - sx, dy = y - sy, d = Math.hypot(dx, dy), k = Math.max(0, 1 - d / 190);
+                x += dx / (d || 1) * k * 26; y += dy / (d || 1) * k * 26;
+                const r = o.s * (.75 + .25 * Math.sin(t * .0016 * o.v + o.p)) * (1 + k * .5);
+                cx.fillStyle = `rgba(${look.bg === "plus" ? ink : rgb},${(.22 + k * .5).toFixed(2)})`; cx.strokeStyle = cx.fillStyle; cx.lineWidth = 1.4;
+                cx.beginPath();
+                if (look.bg === "plus") { cx.moveTo(x - r / 2, y); cx.lineTo(x + r / 2, y); cx.moveTo(x, y - r / 2); cx.lineTo(x, y + r / 2); cx.stroke(); }
+                else { cx.moveTo(x, y - r); cx.quadraticCurveTo(x, y, x + r, y); cx.quadraticCurveTo(x, y, x, y + r); cx.quadraticCurveTo(x, y, x - r, y); cx.quadraticCurveTo(x, y, x, y - r); cx.fill(); }
             });
         } else if (look.bg === "lines") {
             cx.lineWidth = 1;
@@ -151,12 +156,6 @@
                     x ? cx.lineTo(x, yy) : cx.moveTo(x, yy);
                 }
                 cx.strokeStyle = `rgba(${ink},.11)`; cx.stroke();
-            }
-        } else if (look.bg === "dots") {
-            for (let y = 14; y < H; y += 28) for (let x = 14; x < W; x += 28) {
-                const dx = x - sx, dy = y - sy, k = Math.max(0, 1 - Math.hypot(dx, dy) / 230);
-                cx.fillStyle = `rgba(${ink},${(.08 + k * .5).toFixed(3)})`;
-                cx.beginPath(); cx.arc(x - dx * k * .08, y - dy * k * .08, 1 + k * 2.4, 0, 6.2832); cx.fill();
             }
         }
         if (!reduce) requestAnimationFrame(frame);
