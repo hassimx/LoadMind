@@ -51,7 +51,7 @@ const dur = m => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` 
 const fmt = t => `${String(Math.floor(t / 60) % 24).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 
 
-// ---------- NLP: keyword analysis (EN + RU) ----------
+// NLP: keyword analysis (EN + RU)
 // "word*" = prefix match (stems), plain "word" = whole word only
 
 const categories = {
@@ -115,7 +115,7 @@ function generateAdvice(score) {
 }
 
 
-// ---------- NLP: smart task input (EN + RU) ----------
+// NLP: smart task input (EN + RU)
 
 const DAYS = [["sun","воскр"],["mon","понед"],["tue","вторн"],["wed","сред"],["thu","четвер"],["fri","пятниц"],["sat","суббот"]];
 
@@ -170,7 +170,7 @@ function parseQuick(text) {
     else if (/(review|read|check|email|повтор|прочит|почт|разобр)/i.test(low) && !categories.academic.keywords.some(k => matches(low, k))) type = "light";
 
     const title = t.replace(new RegExp(`${B}(due|by|on|at|в|к|до|с|from|to|на|надо|нужно|need to|have to)${E}`, "giu"), " ").replace(/[,;]+/g, " ").replace(/\s[-–—]\s|^\s*[-–—]|[-–—]\s*$/g, " ").replace(/\s+/g, " ").trim();
-    return { title: title || text.trim(), minutes: clamp(minutes || 45, 5, 720), type, due, at };
+    return { title: title || text.trim(), minutes: clamp(minutes || 45, 5, 720), type, due, at, sure: !!(minutes || due || at) };
 }
 
 function dueInfo(t) {
@@ -180,7 +180,7 @@ function dueInfo(t) {
     return { label, hrs, cls: hrs < 0 ? "overdue" : hrs < 24 ? "soon" : "" };
 }
 
-// ---------- metrics & plan ----------
+// metrics & plan
 
 function metrics() {
     const open = state.tasks.filter(t => !t.done);
@@ -228,7 +228,7 @@ function buildPlan() {
     return out.sort((a, b) => a.time.localeCompare(b.time));
 }
 
-// ---------- calendar export ----------
+// calendar export
 
 const icsDate = d => d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "T" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0") + "00";
 const icsText = s => String(s).replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
@@ -260,7 +260,7 @@ function gcalLink(t) {
 }
 
 
-// ---------- AI (called straight from the browser with the user's own key) ----------
+// AI (through the Worker proxy; own key only when no proxy is set)
 
 // Paste your deployed Worker URL here (see worker.js). With it, users need no API key.
 const AI_PROXY = "https://loadmind-ai.alena-anilove1970.workers.dev";
@@ -300,7 +300,8 @@ async function callAI(system, user) {
 }
 
 async function smartParse(text) {
-    if (!hasAI()) return parseQuick(text);
+    const quick = parseQuick(text);
+    if (!hasAI() || quick.sure) return quick;
     try {
         const sys = `Extract one task from the user's text (English or Russian). Now is ${toLocalInput(new Date())}. Reply with JSON only: {"title": string, "minutes": number, "type": "exam"|"study"|"physical"|"light", "due": "YYYY-MM-DDTHH:mm" or "", "at": "YYYY-MM-DDTHH:mm" or ""}. "due" is a deadline (words like by, до, к, сдать). "at" is when the user wants to DO it (a start time like "at 14:00", "в 14:00" or a range like 14:00-17:00; then minutes = the range length). exam = SAT/IELTS/exam prep, study = homework/lessons/projects, physical = sport, light = easy review. Default minutes 45. Keep the title in the user's language.`;
         const out = await callAI(sys, text);
@@ -339,12 +340,14 @@ async function askCoach() {
         const ru = localStorage.getItem("loadmind.lang") === "ru";
         out.textContent = /fetch/i.test(e.message)
             ? (ru ? "Не удалось связаться с ИИ-сервером. Открой сайт по его веб-адресу, а не файлом с компьютера, и проверь ALLOWED_ORIGIN в Worker." : "Can't reach the AI server. Open the site at its web address (not the file on your computer) and check ALLOWED_ORIGIN in the Worker.")
+            : /quota|exhaust|rate|limit|429/i.test(e.message)
+            ? (ru ? "Дневной лимит ИИ закончился. Попробуй позже, обычно он обновляется раз в сутки." : "The daily AI limit is used up. Try again later, it usually resets once a day.")
             : "AI request failed: " + e.message;
     }
     btn.disabled = false;
 }
 
-// ---------- render ----------
+// render
 
 function tag(text) {
     const s = document.createElement("span");
@@ -442,7 +445,7 @@ function showView(v) {
 }
 
 
-// ---------- events ----------
+// events
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
 $("analyzeButton").addEventListener("click", async () => {
@@ -520,7 +523,7 @@ $("resetButton").addEventListener("click", () => {
 });
 
 
-// ---------- appearance: theme + accent color ----------
+// appearance: theme + accent color
 
 const PRESETS = [
     { name: "Lavender", hex: "#b9a7f5" },
@@ -569,7 +572,7 @@ function initAppearance() {
 }
 
 
-// ---------- init ----------
+// init
 
 function init() {
     $("notes").value = state.notes;

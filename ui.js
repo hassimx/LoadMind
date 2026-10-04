@@ -4,7 +4,7 @@
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const root = document.documentElement;
 
-    /* ---------- language (EN / RU) ---------- */
+    /* language (EN / RU) */
     const RU = {
         "Dashboard": "Обзор", "My Tasks": "Задачи", "Schedule": "План", "Workload": "Нагрузка", "Settings": "Настройки",
         "LoadMind Coach": "Коуч LoadMind", "Get insight": "Получить совет", "Developer settings": "Для разработчиков", "Network": "Сеть", "Study time": "Время на учёбу", "Daily balance": "Баланс дня",
@@ -76,7 +76,7 @@
     });
     if (typeof render === "function") { const r = render; render = function () { r.apply(this, arguments); if (typeof fillDays === "function") fillDays(); tr(); }; }
 
-    /* ---------- quote of the day: changes every 4 hours ---------- */
+    /* quote of the day: changes once a day (local midnight) */
     const Q = [
         ["Do less, but finish it.", "Делай меньше, но доводи до конца."],
         ["A tired mind lies about how much is left.", "Уставший ум врёт, сколько ещё осталось."],
@@ -101,7 +101,7 @@
     }
     setInterval(quote, 6e4);
 
-    /* ---------- custom cursor + magnetic buttons ---------- */
+    /* custom cursor + magnetic buttons */
     const cur = $(".cursor"), dot = cur.children[0], ring = cur.children[1];
     let px = innerWidth / 2, py = innerHeight / 2, bx = px, by = py, mx = -999, my = -999, sx = -999, sy = -999;
     addEventListener("pointermove", e => {
@@ -115,7 +115,7 @@
     document.addEventListener("pointerdown", () => ring.style.scale = ".7");
     document.addEventListener("pointerup", () => ring.style.scale = "1");
 
-    /* ---------- background styles (Settings -> Background) ---------- */
+    /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
     look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "network"; look.cur = look.cur || "custom";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
@@ -165,7 +165,7 @@
     }
     requestAnimationFrame(frame);
 
-    /* ---------- page transitions ---------- */
+    /* page transitions */
     const wipe = document.createElement("div"); wipe.className = "wipe"; document.body.appendChild(wipe);
     function enter() {
         if (reduce) return;
