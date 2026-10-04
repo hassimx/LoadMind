@@ -97,6 +97,7 @@
 </head>
 
 <body>
+    <div class="bg" aria-hidden="true"><i></i><i></i><i></i><u></u><u></u><u></u><b>+</b><b>+</b><b>+</b><b>+</b></div>
 
     <header class="topbar">
         <div class="wrap topbar-inner">
@@ -123,6 +124,17 @@
             <h1 id="greeting"></h1>
             <p class="subtitle" id="summary"></p>
         </header>
+
+        <section class="block coach" data-views="dashboard workload">
+            <div class="coach-head">
+                <div>
+                    <h2>AI coach</h2>
+                    <p class="section-description">Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. The AI only advises: the schedule itself is built by rules.</p>
+                </div>
+                <button class="primary-button" id="coachButton" type="button">✦ Ask AI coach</button>
+            </div>
+            <p class="coach-out" id="coachOut"></p>
+        </section>
 
         <section class="stats-grid" data-views="dashboard workload">
             <div class="stat-card">
@@ -201,13 +213,6 @@
             </div>
 
             <div class="tags breakdown" id="breakdown"></div>
-        </section>
-
-        <section class="block" data-views="dashboard workload">
-            <h2>AI coach</h2>
-            <p class="section-description">Sends your tasks, deadlines, peak time and notes to an AI model and returns short, concrete advice. The AI only advises: the schedule itself is built by rules.</p>
-            <button class="primary-button" id="coachButton" type="button">Ask AI coach</button>
-            <p class="coach-out" id="coachOut"></p>
         </section>
 
         <section class="block" data-views="tasks">
