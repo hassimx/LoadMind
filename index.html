@@ -170,10 +170,11 @@
 
             <div class="block" data-views="dashboard schedule">
                 <h2>Plan for today</h2>
-                <p class="section-description">Hard tasks first, then training, then light stuff. Breaks are added after long sessions.</p>
+                <p class="section-description">Hard tasks start at your peak focus time (set in Settings), light ones fill the gap before it. Breaks after long sessions.</p>
 
                 <div class="schedule" id="schedule"></div>
 
+                <div class="row-actions"><button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
                 <div class="warning" id="warning">
                     <div class="warning-title" id="warningTitle"></div>
                     <p id="warningText"></p>
@@ -202,12 +203,25 @@
             <div class="tags breakdown" id="breakdown"></div>
         </section>
 
+        <section class="block" data-views="dashboard workload">
+            <h2>AI coach</h2>
+            <p class="section-description">Sends your tasks, deadlines, peak time and notes to an AI model and returns a short, concrete plan advice. Needs an API key (Settings).</p>
+            <button class="primary-button" id="coachButton" type="button">Ask AI coach</button>
+            <p class="coach-out" id="coachOut"></p>
+        </section>
+
         <section class="block" data-views="tasks">
             <h2>My tasks</h2>
             <p class="section-description">Add what you plan to do today. The plan and the index recalculate on their own.</p>
+            <form class="quick" id="quickForm">
+                <input id="quickText" type="text" autocomplete="off" aria-label="Smart input" placeholder="Smart input: «SAT Math 1h tomorrow 18:00» or «сдать отчёт в пятницу в 18:00, 2 часа»">
+                <button class="primary-button" type="submit">Parse</button>
+            </form>
+            <p class="hint" id="quickHint">Understands duration, day (today / tomorrow / weekday), time, EN + RU. Uses AI when a key is set, otherwise a rule-based parser.</p>
             <form class="form-row" id="taskForm">
                 <input id="taskTitle" type="text" placeholder="Task, e.g. SAT Reading" aria-label="Task name" autocomplete="off">
                 <input id="taskMinutes" type="number" min="5" max="600" step="5" value="45" aria-label="Minutes">
+                <input id="taskDue" type="datetime-local" aria-label="Deadline">
                 <select id="taskType" aria-label="Task type">
                     <option value="exam">Exam prep</option>
                     <option value="study">Study</option>
@@ -223,6 +237,14 @@
             <h2>Settings</h2>
             <label class="setting">Your name <input id="setName" type="text" placeholder="Optional"></label>
             <label class="setting">Day starts at <input id="setStart" type="time" value="09:00"></label>
+            <label class="setting">Peak focus time
+                <select id="setPeak"><option value="morning">Morning (08:00)</option><option value="day">Afternoon (13:00)</option><option value="evening">Evening (18:00)</option></select>
+            </label>
+            <label class="setting">AI provider
+                <select id="setProvider"><option value="gemini">Google Gemini (free key)</option><option value="anthropic">Anthropic Claude</option></select>
+            </label>
+            <label class="setting">AI model <input id="setModel" type="text" autocomplete="off"></label>
+            <label class="setting">AI API key <input id="setKey" type="password" autocomplete="off" placeholder="Stays in this browser only"></label>
             <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
             <div class="setting">
                 <span>Accent color</span>
@@ -231,6 +253,7 @@
                     <input id="accentPicker" type="color" aria-label="Custom accent color" title="Pick any color">
                 </div>
             </div>
+            <div class="setting"><span>Next step: Telegram bot for deadline reminders (not in this prototype).</span></div>
             <div class="setting"><span>Everything is stored in this browser only.</span><button class="secondary-button" id="resetButton">Reset tasks and notes</button></div>
         </section>
 
