@@ -58,7 +58,7 @@ const categories = {
     ] },
     fatigue: { name: "fatigue", points: 25, keywords: [
         "tired", "exhausted", "fatigue", "stress*", "overwhelmed", "burnout", "no energy", "can't focus", "cannot focus",
-        "устал*", "устав*", "вымот*", "стресс*", "выгор*", "нет сил", "не могу сосредоточ*"
+        "sleepy", "sleep deprived", "хочу спать", "сонн*", "засыпа*", "не выспал*", "устал*", "устав*", "вымот*", "стресс*", "выгор*", "нет сил", "не могу сосредоточ*"
     ] },
     rest: { name: "recovery", points: -5, keywords: [
         "rest", "sleep*", "break*", "recovery", "relax*",
@@ -285,6 +285,15 @@ async function smartParse(text) {
     }
 }
 
+async function analyzeNotesAI(text) {
+    const m = metrics();
+    const sys = `You read a student's note about their day and judge workload and state. Reply with JSON only: {"score": number 0-100 (how heavy/draining the day feels from the note: 10 light, 40 normal, 70 heavy, 90 critical), "tags": array of 1-4 short lowercase labels in the note's language (e.g. "sleepiness", "стресс", "учёба"), "advice": one or two concrete sentences in the note's language, taking the open tasks and overload index into account}. No medical advice.`;
+    const ctx = { note: text, overloadIndex: m.index, openTasks: state.tasks.filter(t => !t.done).map(t => `${t.title} ${t.minutes}min${t.due ? " due " + t.due : ""}`) };
+    const j = JSON.parse((await callAI(sys, JSON.stringify(ctx))).match(/\{[\s\S]*\}/)[0]);
+    if (!j.advice || !Array.isArray(j.tags)) throw new Error("bad json");
+    return { score: clamp(Math.round(+j.score) || 30), detectedCategories: j.tags.slice(0, 4).map(String), advice: String(j.advice) };
+}
+
 async function askCoach() {
     const out = $("coachOut"), btn = $("coachButton");
     out.textContent = hasAI() ? "Thinking…" : "Add an API key in Settings first.";
@@ -385,7 +394,7 @@ function render() {
     // saved analysis
     if (state.notes) {
         $("tags").replaceChildren(...(state.categories.length ? state.categories : ["general"]).map(tag));
-        $("advice").textContent = generateAdvice(index);
+        $("advice").textContent = state.notesAdvice || generateAdvice(index);
         $("analysisResult").style.display = "block";
     } else {
         $("analysisResult").style.display = "none";
@@ -407,13 +416,21 @@ function showView(v) {
 
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
-$("analyzeButton").addEventListener("click", () => {
+$("analyzeButton").addEventListener("click", async () => {
     const text = $("notes").value.trim();
     if (!text) { $("notes").focus(); return; }
-    const r = analyzeText(text);
+    const btn = $("analyzeButton");
+    let r, advice = "";
+    if (hasAI()) {
+        btn.disabled = true; btn.textContent = "Reading…";
+        try { r = await analyzeNotesAI(text); advice = r.advice; } catch (e) { r = null; }
+        btn.disabled = false; btn.textContent = "Read my notes";
+    }
+    if (!r) r = analyzeText(text);
     state.notes = text;
     state.notesScore = r.score;
     state.categories = r.detectedCategories;
+    state.notesAdvice = advice;
     save();
     render();
 });
