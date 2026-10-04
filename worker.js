@@ -2,7 +2,9 @@
 // Settings -> Variables and Secrets: GEMINI_KEY (secret), optional ALLOWED_ORIGIN (your site URL), GEMINI_MODEL.
 export default {
   async fetch(req, env) {
-    const origin = env.ALLOWED_ORIGIN || "*";
+    const list = (env.ALLOWED_ORIGIN || "*").split(",").map(x => x.trim());
+    const reqOrigin = req.headers.get("origin") || "";
+    const origin = list.includes("*") ? "*" : (list.includes(reqOrigin) ? reqOrigin : list[0]);
     const cors = { "access-control-allow-origin": origin, "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type" };
     const reply = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { ...cors, "content-type": "application/json" } });
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });

@@ -308,7 +308,10 @@ async function askCoach() {
         };
         out.textContent = (await callAI(sys, JSON.stringify(data))).trim();
     } catch (e) {
-        out.textContent = "AI request failed: " + e.message;
+        const ru = localStorage.getItem("loadmind.lang") === "ru";
+        out.textContent = /fetch/i.test(e.message)
+            ? (ru ? "Не удалось связаться с ИИ-сервером. Открой сайт по его веб-адресу, а не файлом с компьютера, и проверь ALLOWED_ORIGIN в Worker." : "Can't reach the AI server. Open the site at its web address (not the file on your computer) and check ALLOWED_ORIGIN in the Worker.")
+            : "AI request failed: " + e.message;
     }
     btn.disabled = false;
 }

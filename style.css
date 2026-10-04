@@ -673,7 +673,7 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .cursor i { position: absolute; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #fff; }
 .cursor b { position: absolute; width: 34px; height: 34px; margin: -17px; border: 1px solid #fff; border-radius: 50%; transition: width .3s, height .3s, margin .3s, background .3s, scale .2s; }
 .cursor.hot b { width: 68px; height: 68px; margin: -34px; background: #fff; }
-@media (hover: hover) and (pointer: fine) { html, html * { cursor: none !important; } }
+@media (hover: hover) and (pointer: fine) { html:not(.std), html:not(.std) * { cursor: none !important; } }
 @media (hover: none) { .cursor { display: none; } }
 
 .topbar { background: color-mix(in srgb, var(--paper) 70%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule); }
@@ -696,7 +696,7 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .coach .primary-button { box-shadow: none; padding: 18px 30px; }
 
 .header { padding-top: 7vh; }
-.header h1 { font: 700 clamp(44px, 8.2vw, 124px) / .94 'Unbounded', sans-serif; letter-spacing: -.055em; }
+.header h1 { font: 700 clamp(30px, 4.4vw, 60px) / 1 'Unbounded', sans-serif; letter-spacing: -.04em; }
 .subtitle { font: 400 12px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .14em; color: var(--ink-3); }
 .quote { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: baseline; padding: 30px 0; border-top: 1px solid var(--rule); }
 .quote small { font: 400 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
@@ -706,3 +706,15 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .task-row, .task { transition: transform .3s ease-out, background .3s; }
 .task-row:hover { transform: translateX(6px); }
 @media (max-width: 760px) { .quote { grid-template-columns: 1fr; gap: 10px; } .tools { gap: 10px; } }
+
+/* ---- v4.1: visible buttons, clearer cursor ---- */
+.primary-button { background: var(--accent); color: #fff; }
+.primary-button::before, .primary-button::after { border-color: #fff; }
+.primary-button:hover { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+.primary-button:hover::before, .primary-button:hover::after { border-color: var(--accent); }
+.secondary-button { background: color-mix(in srgb, var(--ink) 8%, transparent); box-shadow: inset 0 0 0 1px var(--ink-3); }
+.cursor { mix-blend-mode: normal; }
+.cursor i { width: 10px; height: 10px; margin: -5px; background: var(--accent); box-shadow: 0 0 0 2px #fff; }
+.cursor b { width: 40px; height: 40px; margin: -20px; border: 2px solid var(--accent); background: transparent; }
+.cursor.hot b { width: 64px; height: 64px; margin: -32px; background: color-mix(in srgb, var(--accent) 22%, transparent); }
+html.std .cursor { display: none; }

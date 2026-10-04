@@ -18,6 +18,15 @@
         "Daily capacity (hours)": "Дневная ёмкость (часы)", "Accent color": "Цвет акцента", "Reset tasks and notes": "Сбросить задачи и заметки",
         "Everything is stored in this browser only.": "Всё хранится только в этом браузере.",
         "Next step: Telegram bot for deadline reminders (not in this prototype).": "Дальше: Telegram-бот с напоминаниями о дедлайнах (в прототипе его нет).",
+        "Too much for one day. Keep the one or two things that matter most and move the rest.": "Слишком много для одного дня. Оставь одно-два самых важных дела, остальное перенеси.",
+        "Heavy day. Don't put two hard tasks back to back, leave a break between them.": "Тяжёлый день. Не ставь две сложные задачи подряд, оставь между ними перерыв.",
+        "Fine as it is. Just keep breaks between the hard blocks.": "Нормально. Просто оставляй перерывы между сложными блоками.",
+        "Light day. Nothing to change.": "Лёгкий день. Менять нечего.",
+        "Light day": "Лёгкий день", "Balanced": "Сбалансировано", "High, but manageable": "Много, но терпимо", "Too much for one day": "Слишком много для одного дня",
+        "Good": "Хорошо", "OK": "Нормально", "Recovery time available": "Есть время на отдых", "Add recovery time": "Добавь время на отдых",
+        "academic": "учёба", "exam": "экзамен", "physical": "спорт", "fatigue": "усталость", "recovery": "отдых",
+        "Background": "Фон", "Glow": "Свечение", "Lines": "Линии", "Dots": "Точки", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
+        "Language": "Язык", "AI provider": "ИИ-провайдер", "Everything is stored in this browser only": "Всё хранится только в этом браузере",
         "Break": "Перерыв", "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка",
         "Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. The AI only advises: the schedule itself is built by rules.": "Читает задачи, дедлайны, пиковое время и заметки и даёт короткий совет. ИИ только советует, расписание строится по правилам.",
         "Write how the day went. The text is scanned for keywords (English and Russian) and feeds into the overload index. The AI reads the note (keyword matching is the fallback).": "Напиши, как прошёл день. ИИ читает заметку (запасной вариант — поиск по ключевым словам) и учитывает её в индексе перегрузки.",
@@ -30,7 +39,8 @@
         "Optional": "Необязательно", "Switch theme": "Сменить тему", "Notes about your day": "Заметки о дне"
     };
     const LBL = { "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка", "Exam prep": "Экзамен" };
-    const num = t => t.replace(/High concentration|Medium load|Physical load|Light load|Exam prep/g, m => LBL[m]).replace(/(\d+) open/, "$1 открыто").replace(/(\d+) h/g, "$1 ч").replace(/(\d+) min/g, "$1 мин").replace(" planned", " запланировано").replace(/ due /, " до ");
+    const MO = { Jan: "янв", Feb: "фев", Mar: "мар", Apr: "апр", May: "мая", Jun: "июн", Jul: "июл", Aug: "авг", Sep: "сен", Oct: "окт", Nov: "ноя", Dec: "дек" }, WD = { Mon: "пн", Tue: "вт", Wed: "ср", Thu: "чт", Fri: "пт", Sat: "сб", Sun: "вс" }, LV = { Low: "Низкая", Normal: "Нормальная", High: "Высокая", Critical: "Критическая" };
+    const num = t => t.replace(/^(Exam prep|Study|Physical|Light) · /, (m, a) => ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a] + " · ").replace(/(Low|Normal|High|Critical) load/, (m, a) => LV[a] + " нагрузка").replace(/peak focus/, "пик концентрации").replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (\d+) (\w{3})/, (m, w, d, mo) => `${WD[w]}, ${d} ${MO[mo] || mo}`).replace(/High concentration|Medium load|Physical load|Light load|Exam prep/g, m => LBL[m]).replace(/(\d+) open/, "$1 открыто").replace(/(\d+) h/g, "$1 ч").replace(/(\d+) min/g, "$1 мин").replace(" planned", " запланировано").replace(/ due /, " до ");
     const orig = new WeakMap(), origAttr = new WeakMap();
     let lang = localStorage.getItem("loadmind.lang") || "en";
     const norm = t => t.replace(/\s+/g, " ").trim();
@@ -43,7 +53,7 @@
             const o = orig.get(n);
             if (!ru) { if (o.out !== undefined && n.nodeValue === o.out) n.nodeValue = o.en; continue; }
             const k = norm(o.en), out = RU[k] || num(o.en);
-            o.out = o.en.replace(k, out); n.nodeValue = o.out;
+            o.out = o.en.match(/^\s*/)[0] + out + o.en.match(/\s*$/)[0]; n.nodeValue = o.out;
         }
         document.querySelectorAll("[placeholder],[aria-label],[title]").forEach(el => {
             ["placeholder", "aria-label", "title"].forEach(a => {
@@ -80,9 +90,9 @@
         ["Knowing when to stop is a skill.", "Уметь остановиться — тоже навык."],
         ["Tomorrow's focus is built tonight.", "Завтрашний фокус собирается сегодня вечером."]
     ];
-    const SLOT = 4 * 3600e3;
+    const SLOT = 24 * 3600e3, TZ = new Date().getTimezoneOffset() * 6e4;
     function quote() {
-        const t = Date.now(), i = Math.floor(t / SLOT) % Q.length, left = SLOT - (t % SLOT);
+        const t = Date.now() - TZ, i = Math.floor(t / SLOT) % Q.length, left = SLOT - (t % SLOT);
         const h = Math.floor(left / 3600e3), m = Math.floor(left % 3600e3 / 60e3), ru = lang === "ru";
         const p = $("#quoteText"), text = Q[i][ru ? 1 : 0];
         if (p.textContent !== text) p.textContent = text;
@@ -104,20 +114,50 @@
     document.addEventListener("pointerdown", () => ring.style.scale = ".7");
     document.addEventListener("pointerup", () => ring.style.scale = "1");
 
-    /* ---------- living dot grid (follows the mouse) ---------- */
-    const cv = $("#dots"), cx = cv.getContext("2d"), GAP = 28;
-    let W, H;
+    /* ---------- background styles (Settings -> Background) ---------- */
+    let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
+    look.bg = look.bg || "glow"; look.cur = look.cur || "custom";
+    const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
+    const applyCur = () => root.classList.toggle("std", look.cur === "standard");
+    applyCur();
+    const sb = $("#setBg"), sc = $("#setCur");
+    sb.value = look.bg; sc.value = look.cur;
+    sb.onchange = () => { look.bg = sb.value; saveLook(); };
+    sc.onchange = () => { look.cur = sc.value; saveLook(); applyCur(); };
+
+    const cv = $("#dots"), cx = cv.getContext("2d");
+    let W, H, rgb = "184,50,128", fr = 0;
     function size() { const d = devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); }
     addEventListener("resize", size); size();
+    function accent() { const h = getComputedStyle(root).getPropertyValue("--accent").trim().replace("#", ""); if (h.length === 6) rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)).join(","); }
     function frame(t) {
-        sx += (mx - sx) * .12; sy += (my - sy) * .12;
+        if (fr++ % 30 === 0) accent();
+        sx += (mx - sx) * .1; sy += (my - sy) * .1;
         cx.clearRect(0, 0, W, H);
-        const dark = root.dataset.theme === "dark", c = dark ? "233,230,223" : "28,27,24";
-        for (let y = GAP / 2; y < H; y += GAP) for (let x = GAP / 2; x < W; x += GAP) {
-            const dx = x - sx, dy = y - sy, d = Math.hypot(dx, dy), k = Math.max(0, 1 - d / 230);
-            const wv = Math.sin(x * .011 + t * .0007) + Math.cos(y * .013 - t * .0005);
-            cx.fillStyle = `rgba(${c},${(.06 + (wv + 2) * .012 + k * .55).toFixed(3)})`;
-            cx.beginPath(); cx.arc(x - dx * k * .08, y - dy * k * .08, .8 + (wv + 2) * .12 + k * 2.4, 0, 6.2832); cx.fill();
+        const dark = root.dataset.theme === "dark", ink = dark ? "233,230,223" : "28,27,24";
+        if (look.bg === "glow") {
+            [[sx, sy, 520, .20], [W * (.25 + .15 * Math.sin(t * .00021)), H * (.35 + .2 * Math.cos(t * .00017)), 620, .12], [W * (.8 + .1 * Math.cos(t * .00019)), H * (.7 + .15 * Math.sin(t * .00023)), 560, .10]].forEach(([x, y, r, a]) => {
+                if (x < -900) return;
+                const g = cx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+                cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+            });
+        } else if (look.bg === "lines") {
+            cx.lineWidth = 1;
+            for (let y = 20; y < H + 40; y += 36) {
+                cx.beginPath();
+                for (let x = 0; x <= W; x += 14) {
+                    const k = Math.max(0, 1 - Math.hypot(x - sx, y - sy) / 260);
+                    const yy = y + Math.sin(x * .008 + t * .0006 + y * .02) * 9 - k * k * 34;
+                    x ? cx.lineTo(x, yy) : cx.moveTo(x, yy);
+                }
+                cx.strokeStyle = `rgba(${ink},.11)`; cx.stroke();
+            }
+        } else if (look.bg === "dots") {
+            for (let y = 14; y < H; y += 28) for (let x = 14; x < W; x += 28) {
+                const dx = x - sx, dy = y - sy, k = Math.max(0, 1 - Math.hypot(dx, dy) / 230);
+                cx.fillStyle = `rgba(${ink},${(.08 + k * .5).toFixed(3)})`;
+                cx.beginPath(); cx.arc(x - dx * k * .08, y - dy * k * .08, 1 + k * 2.4, 0, 6.2832); cx.fill();
+            }
         }
         if (!reduce) requestAnimationFrame(frame);
     }
