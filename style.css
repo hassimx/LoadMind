@@ -738,3 +738,18 @@ html.std .cursor { display: none; }
 .adv[open] summary { margin-bottom: 8px; }
 .adv .setting { border-top: 1px solid var(--rule); }
 .breakdown + .warning { margin-top: 22px; }
+
+/* ---- v4.4: simpler tasks form ---- */
+.manual { margin: 6px 0 22px; }
+.manual summary { font: 500 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); cursor: pointer; padding: 6px 0; }
+.manual[open] summary { color: var(--ink); }
+.manual-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; padding: 16px 0 4px; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 6px; font: 500 11px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.field.wide { grid-column: 1 / -1; }
+.field input, .field select { font: 400 15px inherit; text-transform: none; letter-spacing: 0; }
+.dur { display: flex; align-items: center; gap: 8px; }
+.dur em { font-style: normal; color: var(--ink-3); letter-spacing: 0; }
+.dur input[type="number"] { width: 70px; }
+.dur select { flex: 1; min-width: 0; }
+.manual-form .primary-button { justify-self: start; }
+@media (max-width: 640px) { .manual-form { grid-template-columns: 1fr; } }

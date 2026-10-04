@@ -26,6 +26,8 @@
         "academic": "учёба", "exam": "экзамен", "physical": "спорт", "fatigue": "усталость", "recovery": "отдых",
         "Background": "Фон", "Sparkles": "Звёздочки", "Plus signs": "Плюсики", "Lines": "Линии", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
         "Language": "Язык", "AI provider": "ИИ-провайдер", "Everything is stored in this browser only": "Всё хранится только в этом браузере",
+        "Add": "Добавить", "Add manually": "Добавить вручную", "Duration": "Длительность", "Deadline": "Дедлайн", "Task": "Задача", "Type": "Тип", "h": "ч", "min": "мин", "Not set": "Не задано", "e.g. SAT Reading": "например, SAT Reading",
+        "Type a task: «SAT Math 1h tomorrow 18:00»": "Напиши задачу: «SAT Math 1ч завтра 18:00»", "Duration, day and time are picked up automatically.": "Длительность, день и время подхватываются сами.",
         "Break": "Перерыв", "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка",
         "Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. It only advises: the schedule itself is built by rules.": "Читает задачи, дедлайны, пиковое время и заметки и даёт короткий совет. Он только советует, расписание строится по правилам.",
         "Write how the day went. The text is scanned for keywords (English and Russian) and feeds into the overload index. The AI reads the note (keyword matching is the fallback).": "Напиши, как прошёл день. ИИ читает заметку (запасной вариант — поиск по ключевым словам) и учитывает её в индексе перегрузки.",
@@ -72,7 +74,7 @@
         lang = b.dataset.lang; localStorage.setItem("loadmind.lang", lang);
         if (typeof render === "function") render(); else tr();
     });
-    if (typeof render === "function") { const r = render; render = function () { r.apply(this, arguments); tr(); }; }
+    if (typeof render === "function") { const r = render; render = function () { r.apply(this, arguments); if (typeof fillDays === "function") fillDays(); tr(); }; }
 
     /* ---------- quote of the day: changes every 4 hours ---------- */
     const Q = [

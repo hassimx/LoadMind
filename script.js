@@ -9,6 +9,18 @@ const PEAK = { morning: 8 * 60, day: 13 * 60, evening: 18 * 60 };
 function soon(days, hour) { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(hour, 0, 0, 0); return toLocalInput(d); }
 function toLocalInput(d) { const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
 
+function fillDays() {
+    const ru = localStorage.getItem("loadmind.lang") === "ru", sel = $("taskDay");
+    sel.innerHTML = "";
+    const add = (v, t) => sel.appendChild(new Option(t, v));
+    add("", ru ? "Без дедлайна" : "No deadline");
+    for (let i = 0; i < 14; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i);
+        const t = d.toLocaleDateString(ru ? "ru-RU" : "en-GB", { weekday: "short", day: "numeric", month: "short" });
+        add(toLocalInput(d).slice(0, 10), i === 0 ? (ru ? "Сегодня, " : "Today, ") + t : i === 1 ? (ru ? "Завтра, " : "Tomorrow, ") + t : t);
+    }
+}
+
 const fresh = () => ({
     settings: { name: "", start: "09:00", capacity: 8, peak: "morning", provider: "gemini", model: "", key: "" },
     tasks: [
@@ -178,18 +190,19 @@ function buildPlan() {
     let light = open.filter(t => t.type === "light");
     const [h, m] = state.settings.start.split(":").map(Number);
     let t = (h || 0) * 60 + (m || 0);
+    const noPeak = state.settings.peak === "none";
     const peak = PEAK[state.settings.peak] || PEAK.morning;
     const out = [];
     const put = (task, extra) => {
         out.push({ time: fmt(t), start: t, minutes: task.minutes, title: task.title, due: task.due, peak: extra, meta: `${dur(task.minutes)} · ${TYPE_LABEL[task.type]}` });
         t += task.minutes;
     };
-    if (hard.length) { // light tasks fill the time before the peak window
+    if (hard.length && !noPeak) { // light tasks fill the time before the peak window
         while (light.length && t + light[0].minutes <= peak) put(light.shift());
         t = Math.max(t, peak);
     }
     hard.forEach((task, i) => {
-        put(task, i === 0);
+        put(task, i === 0 && !noPeak);
         if ((hard[i + 1] || phys.length) && task.minutes >= 40) {
             out.push({ time: fmt(t), title: "Break", meta: "15 min", rest: true });
             t += 15;
@@ -440,9 +453,10 @@ $("taskForm").addEventListener("submit", e => {
     e.preventDefault();
     const title = $("taskTitle").value.trim();
     if (!title) return;
-    const minutes = clamp(parseInt($("taskMinutes").value, 10) || 30, 5, 600);
-    state.tasks.push({ id: state.nextId++, title, minutes, type: $("taskType").value, done: false, due: $("taskDue").value });
-    $("taskTitle").value = ""; $("taskDue").value = "";
+    const minutes = clamp((parseInt($("taskH").value, 10) || 0) * 60 + (parseInt($("taskM").value, 10) || 0) || 30, 5, 720);
+    const day = $("taskDay").value;
+    state.tasks.push({ id: state.nextId++, title, minutes, type: $("taskType").value, done: false, due: day ? day + "T" + ($("taskTime").value || "18:00") : "" });
+    $("taskTitle").value = ""; $("taskH").value = 0; $("taskM").value = 45; $("taskDay").value = "";
     save();
     render();
 });
@@ -548,6 +562,7 @@ function init() {
     $("setStart").value = state.settings.start;
     $("setCapacity").value = state.settings.capacity;
     $("setPeak").value = state.settings.peak;
+fillDays();
     $("setProvider").value = state.settings.provider;
     $("setModel").value = state.settings.model;
     $("setModel").placeholder = DEFAULT_MODEL[state.settings.provider];
