@@ -232,9 +232,19 @@ function gcalLink(t) {
 
 // ---------- AI (called straight from the browser with the user's own key) ----------
 
+// Paste your deployed Worker URL here (see worker.js). With it, users need no API key.
+const AI_PROXY = "https://loadmind-ai.alena-anilove1970.workers.dev";
+const hasAI = () => !!(AI_PROXY || state.settings.key);
+
 const DEFAULT_MODEL = { gemini: "gemini-2.5-flash", anthropic: "claude-haiku-4-5-20251001" };
 
 async function callAI(system, user) {
+    if (AI_PROXY) {
+        const r = await fetch(AI_PROXY, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, user }) });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || r.status);
+        return d.text;
+    }
     const { provider, key } = state.settings;
     const model = state.settings.model || DEFAULT_MODEL[provider];
     if (!key) throw new Error("No API key");
@@ -260,7 +270,7 @@ async function callAI(system, user) {
 }
 
 async function smartParse(text) {
-    if (!state.settings.key) return parseQuick(text);
+    if (!hasAI()) return parseQuick(text);
     try {
         const sys = `Extract one task from the user's text (English or Russian). Now is ${toLocalInput(new Date())}. Reply with JSON only: {"title": string, "minutes": number, "type": "exam"|"study"|"physical"|"light", "due": "YYYY-MM-DDTHH:mm" or ""}. exam = SAT/IELTS/exam prep, study = homework/lessons/projects, physical = sport, light = easy review. Default minutes 45. Keep the title in the user's language.`;
         const out = await callAI(sys, text);
@@ -274,8 +284,8 @@ async function smartParse(text) {
 
 async function askCoach() {
     const out = $("coachOut"), btn = $("coachButton");
-    out.textContent = state.settings.key ? "Thinking…" : "Add an API key in Settings first.";
-    if (!state.settings.key) return;
+    out.textContent = hasAI() ? "Thinking…" : "Add an API key in Settings first.";
+    if (!hasAI()) return;
     btn.disabled = true;
     try {
         const m = metrics();

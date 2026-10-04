@@ -19,3 +19,6 @@ Data lives in `localStorage`.
 ## AI (v2.1)
 Settings -> pick Gemini or Claude, paste your own API key. Then: smart input is parsed by the model (rules are the fallback) and "Ask AI coach" gives advice from your tasks, deadlines, peak time and notes.
 The key is kept in localStorage and sent only to the provider. Prototype only: for a real release move the call behind a backend so the key is never in the browser.
+
+## AI without user keys
+Deploy `worker.js` on Cloudflare Workers, add the secret GEMINI_KEY, then set `AI_PROXY` at the top of the AI section in `script.js` to the Worker URL.
