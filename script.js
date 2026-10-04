@@ -571,6 +571,9 @@ function init() {
     $("setModel").placeholder = DEFAULT_MODEL[state.settings.provider];
     $("setKey").value = state.settings.key;
     if (AI_PROXY) ["setProvider", "setModel", "setKey"].forEach(id => { $(id).closest("label").hidden = true; });
+    
+    applyLanguage(currentLang); // ВСТАВИТЬ ЭТУ СТРОКУ СЮДА
+    
     render();
     showView(view);
 }
