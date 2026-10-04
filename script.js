@@ -432,7 +432,7 @@ function showView(v) {
 
 
 // ---------- events ----------
-
+$("langSwitcher").addEventListener("change", (e) => applyLanguage(e.target.value));
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
 $("analyzeButton").addEventListener("click", async () => {
