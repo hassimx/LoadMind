@@ -127,6 +127,31 @@
             <p class="subtitle" id="summary"></p>
         </header>
 
+        <section class="block" data-views="dashboard workload">
+            <div class="overload-header">
+                <div>
+                    <h2>Overload index</h2>
+                    <p class="section-description">Open tasks against your daily capacity, plus what your notes say. 0 to 100, higher is worse.</p>
+                </div>
+                <div class="score" id="score"></div>
+            </div>
+
+            <div class="large-progress"><div class="large-progress-fill" id="scoreBar"></div></div>
+            <div class="scale">
+                <span>Low</span>
+                <span>Normal</span>
+                <span>High</span>
+                <span>Critical</span>
+            </div>
+
+            <div class="tags breakdown" id="breakdown"></div>
+                <div class="warning" id="warning">
+                    <div class="warning-title" id="warningTitle"></div>
+                    <p id="warningText"></p>
+                </div>
+
+        </section>
+
         <section class="quote" data-views="dashboard">
             <small id="quoteMeta"></small>
             <p id="quoteText"></p>
@@ -135,10 +160,10 @@
         <section class="block coach" data-views="dashboard workload">
             <div class="coach-head">
                 <div>
-                    <h2>AI coach</h2>
-                    <p class="section-description">Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. The AI only advises: the schedule itself is built by rules.</p>
+                    <h2>LoadMind Coach</h2>
+                    <p class="section-description">Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. It only advises: the schedule itself is built by rules.</p>
                 </div>
-                <button class="primary-button" id="coachButton" type="button">✦ Ask AI coach</button>
+                <button class="primary-button" id="coachButton" type="button">Get insight</button>
             </div>
             <p class="coach-out" id="coachOut"></p>
         </section>
@@ -189,32 +214,8 @@
                 <div class="schedule" id="schedule"></div>
 
                 <div class="row-actions"><button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
-                <div class="warning" id="warning">
-                    <div class="warning-title" id="warningTitle"></div>
-                    <p id="warningText"></p>
-                </div>
             </div>
 
-        </section>
-
-        <section class="block" data-views="dashboard workload">
-            <div class="overload-header">
-                <div>
-                    <h2>Overload index</h2>
-                    <p class="section-description">Open tasks against your daily capacity, plus what your notes say. 0 to 100, higher is worse.</p>
-                </div>
-                <div class="score" id="score"></div>
-            </div>
-
-            <div class="large-progress"><div class="large-progress-fill" id="scoreBar"></div></div>
-            <div class="scale">
-                <span>Low</span>
-                <span>Normal</span>
-                <span>High</span>
-                <span>Critical</span>
-            </div>
-
-            <div class="tags breakdown" id="breakdown"></div>
         </section>
 
         <section class="block" data-views="tasks">
@@ -224,7 +225,7 @@
                 <input id="quickText" type="text" autocomplete="off" aria-label="Smart input" placeholder="Smart input: «SAT Math 1h tomorrow 18:00» or «сдать отчёт в пятницу в 18:00, 2 часа»">
                 <button class="primary-button" type="submit">Parse</button>
             </form>
-            <p class="hint" id="quickHint">Understands duration, day (today / tomorrow / weekday), time, EN + RU. Uses AI when a key is set, otherwise a rule-based parser.</p>
+            <p class="hint" id="quickHint">Understands duration, day (today / tomorrow / weekday) and time, in English and Russian.</p>
             <form class="form-row" id="taskForm">
                 <input id="taskTitle" type="text" placeholder="Task, e.g. SAT Reading" aria-label="Task name" autocomplete="off">
                 <input id="taskMinutes" type="number" min="5" max="600" step="5" value="45" aria-label="Minutes">
@@ -247,14 +248,16 @@
             <label class="setting">Peak focus time
                 <select id="setPeak"><option value="morning">Morning (08:00)</option><option value="day">Afternoon (13:00)</option><option value="evening">Evening (18:00)</option></select>
             </label>
+            <details class="adv" id="advanced"><summary>Developer settings</summary>
             <label class="setting">AI provider
                 <select id="setProvider"><option value="gemini">Google Gemini (free key)</option><option value="anthropic">Anthropic Claude</option></select>
             </label>
             <label class="setting">AI model <input id="setModel" type="text" autocomplete="off"></label>
             <label class="setting">AI API key <input id="setKey" type="password" autocomplete="off" placeholder="Stays in this browser only"></label>
+            </details>
             <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
             <label class="setting">Background
-                <select id="setBg"><option value="sparkles">Sparkles</option><option value="plus">Plus signs</option><option value="lines">Lines</option><option value="off">Off</option></select>
+                <select id="setBg"><option value="network">Network</option><option value="lines">Lines</option><option value="off">Off</option></select>
             </label>
             <label class="setting">Cursor
                 <select id="setCur"><option value="custom">Custom</option><option value="standard">Standard</option></select>

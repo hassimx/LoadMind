@@ -7,7 +7,7 @@
     /* ---------- language (EN / RU) ---------- */
     const RU = {
         "Dashboard": "Обзор", "My Tasks": "Задачи", "Schedule": "План", "Workload": "Нагрузка", "Settings": "Настройки",
-        "AI coach": "ИИ-коуч", "✦ Ask AI coach": "✦ Спросить коуча", "Study time": "Время на учёбу", "Daily balance": "Баланс дня",
+        "LoadMind Coach": "Коуч LoadMind", "Get insight": "Получить совет", "Developer settings": "Для разработчиков", "Network": "Сеть", "Study time": "Время на учёбу", "Daily balance": "Баланс дня",
         "Notes": "Заметки", "Read my notes": "Прочитать заметки", "Found in your notes": "Найдено в заметках", "Plan for today": "План на сегодня",
         "Export plan + deadlines (.ics for Google Calendar)": "Экспорт плана и дедлайнов (.ics для Google Календаря)",
         "Overload index": "Индекс перегрузки", "Low": "Низкий", "Normal": "Нормальный", "High": "Высокий", "Critical": "Критический",
@@ -27,12 +27,12 @@
         "Background": "Фон", "Sparkles": "Звёздочки", "Plus signs": "Плюсики", "Lines": "Линии", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
         "Language": "Язык", "AI provider": "ИИ-провайдер", "Everything is stored in this browser only": "Всё хранится только в этом браузере",
         "Break": "Перерыв", "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка",
-        "Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. The AI only advises: the schedule itself is built by rules.": "Читает задачи, дедлайны, пиковое время и заметки и даёт короткий совет. ИИ только советует, расписание строится по правилам.",
+        "Reads your tasks, deadlines, peak time and notes and gives short, concrete advice. It only advises: the schedule itself is built by rules.": "Читает задачи, дедлайны, пиковое время и заметки и даёт короткий совет. Он только советует, расписание строится по правилам.",
         "Write how the day went. The text is scanned for keywords (English and Russian) and feeds into the overload index. The AI reads the note (keyword matching is the fallback).": "Напиши, как прошёл день. ИИ читает заметку (запасной вариант — поиск по ключевым словам) и учитывает её в индексе перегрузки.",
         "Hard tasks start at your peak focus time (set in Settings), light ones fill the gap before it. Breaks after long sessions.": "Сложные задачи начинаются в пик концентрации (выбери в настройках), лёгкие заполняют время до него. После долгих сессий идут перерывы.",
         "Open tasks against your daily capacity, plus what your notes say. 0 to 100, higher is worse.": "Открытые задачи против дневной ёмкости плюс то, что в заметках. От 0 до 100, чем выше, тем хуже.",
         "Add what you plan to do today. The plan and the index recalculate on their own.": "Добавь, что планируешь сегодня. План и индекс пересчитаются сами.",
-        "Understands duration, day (today / tomorrow / weekday), time, EN + RU. Uses AI when a key is set, otherwise a rule-based parser.": "Понимает длительность, день и время на русском и английском. Работает через ИИ, а если его нет, то по правилам.",
+        "Understands duration, day (today / tomorrow / weekday) and time, in English and Russian.": "Понимает длительность, день (сегодня / завтра / день недели) и время на русском и английском.",
         "Smart input: «SAT Math 1h tomorrow 18:00» or «сдать отчёт в пятницу в 18:00, 2 часа»": "Умный ввод: «SAT Math 1ч завтра 18:00» или «сдать отчёт в пятницу в 18:00, 2 часа»",
         "Task, e.g. SAT Reading": "Задача, например SAT Reading", "Task name": "Название", "Minutes": "Минуты", "Deadline": "Дедлайн", "Task type": "Тип",
         "Optional": "Необязательно", "Switch theme": "Сменить тему", "Notes about your day": "Заметки о дне"
@@ -115,7 +115,7 @@
 
     /* ---------- background styles (Settings -> Background) ---------- */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = ["sparkles", "plus", "lines", "off"].includes(look.bg) ? look.bg : "sparkles"; look.cur = look.cur || "custom";
+    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "network"; look.cur = look.cur || "custom";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();
@@ -134,18 +134,19 @@
         sx += (mx - sx) * .1; sy += (my - sy) * .1;
         cx.clearRect(0, 0, W, H);
         const dark = root.dataset.theme === "dark", ink = dark ? "233,230,223" : "28,27,24";
-        if (look.bg === "sparkles" || look.bg === "plus") {
-            if (!stars.length) for (let i = 0; i < 46; i++) stars.push({ x: Math.random(), y: Math.random(), s: 5 + Math.random() * 13, p: Math.random() * 6.3, v: .4 + Math.random() * .9 });
-            stars.forEach(o => {
-                let x = ((o.x * W + t * .004 * o.v) % (W + 40)) - 20, y = ((o.y * H - t * .006 * o.v) % (H + 40) + H + 40) % (H + 40) - 20;
-                const dx = x - sx, dy = y - sy, d = Math.hypot(dx, dy), k = Math.max(0, 1 - d / 190);
-                x += dx / (d || 1) * k * 26; y += dy / (d || 1) * k * 26;
-                const r = o.s * (.75 + .25 * Math.sin(t * .0016 * o.v + o.p)) * (1 + k * .5);
-                cx.fillStyle = `rgba(${look.bg === "plus" ? ink : rgb},${(.22 + k * .5).toFixed(2)})`; cx.strokeStyle = cx.fillStyle; cx.lineWidth = 1.4;
-                cx.beginPath();
-                if (look.bg === "plus") { cx.moveTo(x - r / 2, y); cx.lineTo(x + r / 2, y); cx.moveTo(x, y - r / 2); cx.lineTo(x, y + r / 2); cx.stroke(); }
-                else { cx.moveTo(x, y - r); cx.quadraticCurveTo(x, y, x + r, y); cx.quadraticCurveTo(x, y, x, y + r); cx.quadraticCurveTo(x, y, x - r, y); cx.quadraticCurveTo(x, y, x, y - r); cx.fill(); }
-            });
+        if (look.bg === "network") {
+            if (!stars.length) for (let i = 0; i < 58; i++) stars.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22 });
+            stars.forEach(o => { o.x = (o.x + o.vx + W) % W; o.y = (o.y + o.vy + H) % H; });
+            const pts = stars.concat([{ x: sx, y: sy, c: 1 }]);
+            cx.lineWidth = 1;
+            for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+                const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y), lim = pts[j].c ? 210 : 150;
+                if (d > lim) continue;
+                cx.strokeStyle = `rgba(${pts[j].c ? rgb : ink},${((1 - d / lim) * (pts[j].c ? .5 : .16)).toFixed(3)})`;
+                cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke();
+            }
+            cx.fillStyle = `rgba(${ink},.38)`;
+            stars.forEach(o => { cx.beginPath(); cx.arc(o.x, o.y, 1.7, 0, 6.2832); cx.fill(); });
         } else if (look.bg === "lines") {
             cx.lineWidth = 1;
             for (let y = 20; y < H + 40; y += 36) {

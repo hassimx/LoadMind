@@ -729,3 +729,12 @@ html.std .cursor { display: none; }
 .cursor i { width: 8px; height: 8px; margin: -4px; background: var(--accent); box-shadow: none; }
 .cursor b { width: 38px; height: 38px; margin: -19px; border: 0; background: color-mix(in srgb, var(--accent) 30%, transparent); }
 .cursor.hot b { width: 60px; height: 60px; margin: -30px; background: color-mix(in srgb, var(--accent) 38%, transparent); }
+
+/* ---- v4.3: overload index is the centre of the page ---- */
+.overload-header .score, #score { font: 700 clamp(64px, 9vw, 128px) / .9 'Unbounded', sans-serif; letter-spacing: -.05em; }
+.large-progress { height: 10px; }
+.adv { padding: 14px 0; border-top: 1px solid var(--rule); }
+.adv summary { font: 500 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); cursor: pointer; }
+.adv[open] summary { margin-bottom: 8px; }
+.adv .setting { border-top: 1px solid var(--rule); }
+.breakdown + .warning { margin-top: 22px; }
