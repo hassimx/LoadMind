@@ -121,46 +121,56 @@ const DAYS = [["sun","воскр"],["mon","понед"],["tue","вторн"],["w
 
 function parseQuick(text) {
     let t = " " + text.trim() + " ";
-    let minutes = 0, due = null, hh = null, mm = 0;
     const NUMW = { "один": 1, "одну": 1, "два": 2, "две": 2, "три": 3, "четыре": 4, "пять": 5, "шесть": 6, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6 };
     t = t.replace(/(?<![\p{L}\p{N}])полтора(?=\s+час)/giu, "1.5")
          .replace(/(?<![\p{L}\p{N}])(один|одну|два|две|три|четыре|пять|шесть|one|two|three|four|five|six)(?=\s+(?:h|hr|hrs|hours?|ч|час|min|мин)[\p{L}]*)/giu, w => NUMW[w.toLowerCase()]);
     const cut = re => { const m = t.match(re); if (m) t = t.replace(re, " "); return m; };
+    const B = "(?<![\\p{L}\\p{N}])", E = "(?![\\p{L}\\p{N}])";
+    let minutes = 0, start = null, end = null, hh = null, mm = 0, prep = "", m;
 
-    let m = cut(/(\d+(?:[.,]\d+)?)\s*(h|hr|hrs|hours?|ч|час\p{L}*)(?![\p{L}])/iu);
-    if (m) minutes = Math.round(parseFloat(m[1].replace(",", ".")) * 60);
-    else if ((m = cut(/(\d+)\s*(min|mins|minutes?|м|мин\p{L}*)(?![\p{L}])/iu))) minutes = parseInt(m[1], 10);
+    // time range: "13:00-17:00", "с 13:00 до 17:00", "from 13:00 to 17:00"
+    if ((m = cut(new RegExp(`(?:${B}(?:с|from)\\s+)?${B}(\\d{1,2})[:.](\\d{2})\\s*(?:[-–—]|до|to|until)\\s*(\\d{1,2})[:.](\\d{2})${E}`, "iu")))) { start = +m[1] * 60 + +m[2]; end = +m[3] * 60 + +m[4]; }
 
-    if ((m = cut(/(?:(?<![\p{L}\p{N}])(?:at|в|к|до)\s+)?(?<![\p{L}\p{N}])(\d{1,2})[:.](\d{2})(?![\p{L}\p{N}])/iu))) { hh = +m[1]; mm = +m[2]; }
-    else if ((m = cut(/(?<![\p{L}\p{N}])(?:at|в|к)\s+(\d{1,2})\s*(am|pm|час\p{L}*)?/iu))) {
-        hh = +m[1]; if (m[2] && m[2].toLowerCase() === "pm" && hh < 12) hh += 12;
-    }
+    // duration: hours and minutes are added together ("1ч 40мин")
+    if ((m = cut(/(\d+(?:[.,]\d+)?)\s*(h|hr|hrs|hours?|ч|час\p{L}*)(?![\p{L}])/iu))) minutes += Math.round(parseFloat(m[1].replace(",", ".")) * 60);
+    if ((m = cut(/(\d+)\s*(min|mins|minutes?|м|мин\p{L}*)(?![\p{L}])/iu))) minutes += parseInt(m[1], 10);
 
-    const base = new Date(); base.setSeconds(0, 0);
-    if (cut(/(?<![\p{L}])(tomorrow|завтра)(?![\p{L}])/iu)) { base.setDate(base.getDate() + 1); due = base; }
-    else if (cut(/(?<![\p{L}])(today|сегодня)(?![\p{L}])/iu)) due = base;
-    else {
-        const low = t.toLowerCase();
-        for (let i = 0; i < 7 && !due; i++) {
-            const [en, ru] = DAYS[i];
-            if (new RegExp(`(?<![\\p{L}])(${en}[a-z]*|${ru}\\p{L}*)`, "u").test(low)) {
-                t = t.replace(new RegExp(`(?:(?<![\\p{L}])(?:on|в|во|к)\\s+)?(?<![\\p{L}])(${en}[a-z]*|${ru}\\p{L}*)`, "iu"), " ");
-                const add = ((i - base.getDay() + 7) % 7) || 7;
-                base.setDate(base.getDate() + add); due = base;
-            }
+    if (start === null) {
+        if ((m = cut(new RegExp(`(?:${B}(at|в|к|до|by|before|due)\\s+)?${B}(\\d{1,2})[:.](\\d{2})${E}`, "iu")))) { prep = (m[1] || "").toLowerCase(); hh = +m[2]; mm = +m[3]; }
+        else if ((m = cut(new RegExp(`${B}(at|в|к|by)\\s+(\\d{1,2})\\s*(am|pm|час\\p{L}*)?`, "iu")))) {
+            prep = m[1].toLowerCase(); hh = +m[2]; if (m[3] && m[3].toLowerCase() === "pm" && hh < 12) hh += 12;
         }
     }
-    if (!due && hh !== null) due = base;
-    if (due) due.setHours(hh !== null ? hh : 18, hh !== null ? mm : 0, 0, 0);
+
+    // day: today / tomorrow / full weekday names only (so "SAT" stays a task name)
+    const base = new Date(); base.setSeconds(0, 0);
+    let dayWord = false;
+    if (cut(new RegExp(`${B}(tomorrow|завтра)${E}`, "iu"))) { base.setDate(base.getDate() + 1); dayWord = true; }
+    else if (cut(new RegExp(`${B}(today|сегодня)${E}`, "iu"))) dayWord = true;
+    else {
+        const WD = [/sunday|воскресень\p{L}*/, /monday|понедельник\p{L}*/, /tuesday|вторник\p{L}*/, /wednesday|сред[ауыеой]/, /thursday|четверг\p{L}*/, /friday|пятниц\p{L}*/, /saturday|суббот\p{L}*/];
+        WD.forEach((re, i) => {
+            if (dayWord) return;
+            const full = new RegExp(`(?:${B}(?:on|в|во|к)\\s+)?${B}(${re.source})${E}`, "iu");
+            if (full.test(t)) { t = t.replace(full, " "); base.setDate(base.getDate() + (((i - base.getDay() + 7) % 7) || 7)); dayWord = true; }
+        });
+    }
 
     const low = text.toLowerCase();
+    const isDue = ["до", "к", "by", "before", "due"].includes(prep) || /(сдать|сдача|submit|deadline|дедлайн)|(^|\s)(by|before|due)\s|(^|\s)(до|к)\s+(завтра|сегодня|понедельник|вторник|сред|четверг|пятниц|суббот|воскресень)/.test(low);
+    let due = "", at = "";
+    const put = (min, d) => { const x = new Date(base); x.setHours(Math.floor(min / 60), min % 60, 0, 0); return toLocalInput(x); };
+    if (start !== null) { at = put(start); if (!minutes) minutes = (end - start + 1440) % 1440; }
+    else if (hh !== null) { if (isDue) due = put(hh * 60 + mm); else at = put(hh * 60 + mm); }
+    else if (dayWord) due = put(18 * 60);
+
     let type = "study";
     if (categories.exam.keywords.some(k => matches(low, k))) type = "exam";
     else if (categories.sport.keywords.some(k => matches(low, k))) type = "physical";
     else if (/(review|read|check|email|повтор|прочит|почт|разобр)/i.test(low) && !categories.academic.keywords.some(k => matches(low, k))) type = "light";
 
-    const title = t.replace(/(?<![\p{L}\p{N}])(due|by|on|at|в|к|до|на|надо|нужно|need to|have to)(?![\p{L}\p{N}])/giu, " ").replace(/[,;]+/g, " ").replace(/\s+/g, " ").trim();
-    return { title: title || text.trim(), minutes: clamp(minutes || 45, 5, 600), type, due: due ? toLocalInput(due) : "" };
+    const title = t.replace(new RegExp(`${B}(due|by|on|at|в|к|до|с|from|to|на|надо|нужно|need to|have to)${E}`, "giu"), " ").replace(/[,;]+/g, " ").replace(/\s[-–—]\s|^\s*[-–—]|[-–—]\s*$/g, " ").replace(/\s+/g, " ").trim();
+    return { title: title || text.trim(), minutes: clamp(minutes || 45, 5, 720), type, due, at };
 }
 
 function dueInfo(t) {
@@ -185,15 +195,19 @@ function metrics() {
 function buildPlan() {
     const byDue = (a, b) => (a.due || "9").localeCompare(b.due || "9");
     const open = state.tasks.filter(t => !t.done).sort(byDue);
-    const hard = open.filter(t => t.type === "exam" || t.type === "study");
-    const phys = open.filter(t => t.type === "physical");
-    let light = open.filter(t => t.type === "light");
+    const today = toLocalInput(new Date()).slice(0, 10), isFixed = x => x.at && x.at.slice(0, 10) === today;
+    const fixed = open.filter(isFixed).map(x => ({ x, s: +x.at.slice(11, 13) * 60 + +x.at.slice(14, 16) })).sort((a, b) => a.s - b.s);
+    const flow = open.filter(x => !isFixed(x));
+    const hard = flow.filter(t => t.type === "exam" || t.type === "study");
+    const phys = flow.filter(t => t.type === "physical");
+    let light = flow.filter(t => t.type === "light");
     const [h, m] = state.settings.start.split(":").map(Number);
     let t = (h || 0) * 60 + (m || 0);
     const noPeak = state.settings.peak === "none";
     const peak = PEAK[state.settings.peak] || PEAK.morning;
     const out = [];
     const put = (task, extra) => {
+        fixed.forEach(f => { if (t < f.s + f.x.minutes && t + task.minutes > f.s) t = f.s + f.x.minutes; });
         out.push({ time: fmt(t), start: t, minutes: task.minutes, title: task.title, due: task.due, peak: extra, meta: `${dur(task.minutes)} · ${TYPE_LABEL[task.type]}` });
         t += task.minutes;
     };
@@ -210,7 +224,8 @@ function buildPlan() {
     });
     phys.forEach(task => put(task));
     light.forEach(task => put(task));
-    return out;
+    fixed.forEach(f => out.push({ time: fmt(f.s), start: f.s, minutes: f.x.minutes, title: f.x.title, due: f.x.due, meta: `${dur(f.x.minutes)} · ${TYPE_LABEL[f.x.type]} · fixed time` }));
+    return out.sort((a, b) => a.time.localeCompare(b.time));
 }
 
 // ---------- calendar export ----------
@@ -239,7 +254,7 @@ function exportICS() {
 }
 
 function gcalLink(t) {
-    const d = new Date(t.due), p = new Date(d.getTime() - t.minutes * 6e4);
+    const d = t.at ? new Date(new Date(t.at).getTime() + t.minutes * 6e4) : new Date(t.due), p = new Date(d.getTime() - t.minutes * 6e4);
     const z = x => icsDate(x);
     return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(t.title) + "&dates=" + z(p) + "/" + z(d) + "&details=" + encodeURIComponent("Added from LoadMind");
 }
@@ -287,11 +302,11 @@ async function callAI(system, user) {
 async function smartParse(text) {
     if (!hasAI()) return parseQuick(text);
     try {
-        const sys = `Extract one task from the user's text (English or Russian). Now is ${toLocalInput(new Date())}. Reply with JSON only: {"title": string, "minutes": number, "type": "exam"|"study"|"physical"|"light", "due": "YYYY-MM-DDTHH:mm" or ""}. exam = SAT/IELTS/exam prep, study = homework/lessons/projects, physical = sport, light = easy review. Default minutes 45. Keep the title in the user's language.`;
+        const sys = `Extract one task from the user's text (English or Russian). Now is ${toLocalInput(new Date())}. Reply with JSON only: {"title": string, "minutes": number, "type": "exam"|"study"|"physical"|"light", "due": "YYYY-MM-DDTHH:mm" or "", "at": "YYYY-MM-DDTHH:mm" or ""}. "due" is a deadline (words like by, до, к, сдать). "at" is when the user wants to DO it (a start time like "at 14:00", "в 14:00" or a range like 14:00-17:00; then minutes = the range length). exam = SAT/IELTS/exam prep, study = homework/lessons/projects, physical = sport, light = easy review. Default minutes 45. Keep the title in the user's language.`;
         const out = await callAI(sys, text);
         const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
         if (!j.title || !TYPE_NAME[j.type]) throw new Error("bad json");
-        return { title: String(j.title), minutes: clamp(Math.round(+j.minutes) || 45, 5, 600), type: j.type, due: /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(j.due || "") ? j.due : "", ai: true };
+        return { title: String(j.title), minutes: clamp(Math.round(+j.minutes) || 45, 5, 600), type: j.type, due: /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(j.due || "") ? j.due : "", at: /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(j.at || "") ? j.at : "", ai: true };
     } catch (e) {
         return parseQuick(text);
     }
@@ -399,9 +414,9 @@ function render() {
         row.querySelector("input").checked = t.done;
         row.querySelector("span").textContent = t.title;
         const di = dueInfo(t), cal = row.querySelector(".cal-link");
-        row.querySelector("small").textContent = `${dur(t.minutes)} · ${TYPE_LABEL[t.type]}` + (t.due ? ` · due ${new Date(t.due).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "");
+        row.querySelector("small").textContent = `${dur(t.minutes)} · ${TYPE_LABEL[t.type]}` + (t.at ? ` · at ${new Date(t.at).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "") + (t.due ? ` · due ${new Date(t.due).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "");
         if (di && di.cls) row.querySelector("small").classList.add(di.cls);
-        if (t.due) cal.href = gcalLink(t); else cal.remove();
+        if (t.due || t.at) cal.href = gcalLink(t); else cal.remove();
         return row;
     }));
     if (!state.tasks.length) $("taskList").innerHTML = `<p class="empty">No tasks yet.</p>`;
@@ -455,8 +470,8 @@ $("taskForm").addEventListener("submit", e => {
     if (!title) return;
     const minutes = clamp((parseInt($("taskH").value, 10) || 0) * 60 + (parseInt($("taskM").value, 10) || 0) || 30, 5, 720);
     const day = $("taskDay").value;
-    state.tasks.push({ id: state.nextId++, title, minutes, type: $("taskType").value, done: false, due: day ? day + "T" + ($("taskTime").value || "18:00") : "" });
-    $("taskTitle").value = ""; $("taskH").value = 0; $("taskM").value = 45; $("taskDay").value = "";
+    state.tasks.push({ id: state.nextId++, title, minutes, type: $("taskType").value, done: false, due: day ? day + "T" + ($("taskTime").value || "18:00") : "", at: $("taskAt").value ? (day || toLocalInput(new Date()).slice(0, 10)) + "T" + $("taskAt").value : "" });
+    $("taskTitle").value = ""; $("taskH").value = 0; $("taskM").value = 45; $("taskDay").value = ""; $("taskAt").value = "";
     save();
     render();
 });
@@ -467,8 +482,8 @@ $("quickForm").addEventListener("submit", async e => {
     if (!text) return;
     $("quickHint").textContent = "Parsing…";
     const r = await smartParse(text);
-    state.tasks.push({ id: state.nextId++, title: r.title, minutes: r.minutes, type: r.type, done: false, due: r.due });
-    $("quickHint").textContent = `${r.ai ? "AI" : "Rules"} · Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.due ? ` · due ${r.due.replace("T", " ")}` : " · no deadline found");
+    state.tasks.push({ id: state.nextId++, title: r.title, minutes: r.minutes, type: r.type, done: false, due: r.due, at: r.at || "" });
+    $("quickHint").textContent = `${r.ai ? "AI" : "Rules"} · Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.at ? ` · at ${r.at.replace("T", " ")}` : "") + (r.due ? ` · due ${r.due.replace("T", " ")}` : "");
     $("quickText").value = "";
     save(); render();
 });
