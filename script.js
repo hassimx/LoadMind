@@ -531,6 +531,7 @@ function init() {
     $("setModel").value = state.settings.model;
     $("setModel").placeholder = DEFAULT_MODEL[state.settings.provider];
     $("setKey").value = state.settings.key;
+    if (AI_PROXY) ["setProvider", "setModel", "setKey"].forEach(id => { $(id).closest("label").hidden = true; });
     render();
     showView(view);
 }
