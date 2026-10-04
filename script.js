@@ -33,26 +33,6 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catc
 
 let state = load();
 let view = "dashboard";
-const i18n = {
-    en: { nav_dashboard: "Dashboard" /* ...остальные переводы... */ },
-    ru: { nav_dashboard: "Обзор" /* ...остальные переводы... */ }
-};
-
-let currentLang = localStorage.getItem("loadmind.lang") || "en";
-
-function applyLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem("loadmind.lang", lang);
-    $("langSwitcher").value = lang;
-    
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        if (i18n[lang] && i18n[lang][key]) el.textContent = i18n[lang][key];
-    });
-    
-    // Вызываем render только если state уже загружен
-    if (typeof render === "function") render();
-}
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 const levelOf = v => (v < 25 ? 0 : v < 50 ? 1 : v < 75 ? 2 : 3);
 const dur = m => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}` : `${m} min`);
@@ -432,7 +412,6 @@ function showView(v) {
 
 
 // ---------- events ----------
-$("langSwitcher").addEventListener("change", (e) => applyLanguage(e.target.value));
 document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
 $("analyzeButton").addEventListener("click", async () => {
@@ -571,8 +550,6 @@ function init() {
     $("setModel").placeholder = DEFAULT_MODEL[state.settings.provider];
     $("setKey").value = state.settings.key;
     if (AI_PROXY) ["setProvider", "setModel", "setKey"].forEach(id => { $(id).closest("label").hidden = true; });
-    
-    applyLanguage(currentLang); // ВСТАВИТЬ ЭТУ СТРОКУ СЮДА
     
     render();
     showView(view);
