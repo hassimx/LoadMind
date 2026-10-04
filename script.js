@@ -111,6 +111,9 @@ const DAYS = [["sun","воскр"],["mon","понед"],["tue","вторн"],["w
 function parseQuick(text) {
     let t = " " + text.trim() + " ";
     let minutes = 0, due = null, hh = null, mm = 0;
+    const NUMW = { "один": 1, "одну": 1, "два": 2, "две": 2, "три": 3, "четыре": 4, "пять": 5, "шесть": 6, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6 };
+    t = t.replace(/(?<![\p{L}\p{N}])полтора(?=\s+час)/giu, "1.5")
+         .replace(/(?<![\p{L}\p{N}])(один|одну|два|две|три|четыре|пять|шесть|one|two|three|four|five|six)(?=\s+(?:h|hr|hrs|hours?|ч|час|min|мин)[\p{L}]*)/giu, w => NUMW[w.toLowerCase()]);
     const cut = re => { const m = t.match(re); if (m) t = t.replace(re, " "); return m; };
 
     let m = cut(/(\d+(?:[.,]\d+)?)\s*(h|hr|hrs|hours?|ч|час\p{L}*)(?![\p{L}])/iu);
@@ -382,7 +385,7 @@ function render() {
     // saved analysis
     if (state.notes) {
         $("tags").replaceChildren(...(state.categories.length ? state.categories : ["general"]).map(tag));
-        $("advice").textContent = generateAdvice(state.notesScore);
+        $("advice").textContent = generateAdvice(index);
         $("analysisResult").style.display = "block";
     } else {
         $("analysisResult").style.display = "none";
