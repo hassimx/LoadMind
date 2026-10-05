@@ -313,9 +313,11 @@ async function smartParse(text) {
     }
 }
 
+const uiLang = () => localStorage.getItem("loadmind.lang") === "ru" ? "Russian" : "English";
+
 async function analyzeNotesAI(text) {
     const m = metrics();
-    const sys = `You read a student's note about their day and judge workload and state. Reply with JSON only: {"score": number 0-100 (how heavy/draining the day feels from the note: 10 light, 40 normal, 70 heavy, 90 critical), "tags": array of 1-4 short lowercase labels in the note's language (e.g. "sleepiness", "стресс", "учёба"), "advice": one or two concrete sentences in the note's language, taking the open tasks and overload index into account}. No medical advice.`;
+    const sys = `You read a student's note about their day and judge workload and state. Reply with JSON only: {"score": number 0-100 (how heavy/draining the day feels from the note: 10 light, 40 normal, 70 heavy, 90 critical), "tags": array of 1-4 short lowercase labels in ${uiLang()} (e.g. "sleepiness", "стресс", "учёба"), "advice": one or two concrete sentences in ${uiLang()}, taking the open tasks and overload index into account}. No medical advice.`;
     const ctx = { note: text, overloadIndex: m.index, openTasks: state.tasks.filter(t => !t.done).map(t => `${t.title} ${t.minutes}min${t.due ? " due " + t.due : ""}`) };
     const j = JSON.parse((await callAI(sys, JSON.stringify(ctx))).match(/\{[\s\S]*\}/)[0]);
     if (!j.advice || !Array.isArray(j.tags)) throw new Error("bad json");
@@ -329,7 +331,7 @@ async function askCoach() {
     btn.disabled = true;
     try {
         const m = metrics();
-        const sys = "You are a calm study-workload coach for a student. Be concrete and short (max 120 words, no markdown). Say what to move or drop, what to do at the peak focus time, and where to rest. Answer in the language the student's tasks/notes are written in. Do not give medical advice.";
+        const sys = "You are a calm study-workload coach for a student. Be concrete and short (max 120 words, no markdown). Say what to move or drop, what to do at the peak focus time, and where to rest. Always answer in " + uiLang() + ", even if the tasks or notes are written in another language. Do not give medical advice.";
         const data = {
             now: new Date().toString(), dayStart: state.settings.start, capacityHours: state.settings.capacity, peakFocus: state.settings.peak,
             overloadIndex: m.index, tasks: state.tasks.filter(t => !t.done).map(t => ({ title: t.title, minutes: t.minutes, type: t.type, due: t.due || null })),
