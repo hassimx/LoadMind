@@ -1,5 +1,5 @@
-// Cloudflare Worker: hides the Gemini key from the browser.
-// Settings -> Variables and Secrets: GEMINI_KEY (secret), optional ALLOWED_ORIGIN (your site URL), GEMINI_MODEL.
+// Cloudflare Worker: hides the Gemini key from the browser
+// Settings -> Variables and Secrets: GEMINI_KEY (secret), optional ALLOWED_ORIGIN (your site URL), GEMINI_MODEL
 export default {
   async fetch(req, env) {
     const list = (env.ALLOWED_ORIGIN || "*").split(",").map(x => x.trim());

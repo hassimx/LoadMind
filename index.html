@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="style.css">
 
     <script>
-    /* Theme + accent color. Runs in <head> so the page never flashes the wrong theme. */
+    /* theme + accent color; runs in <head> so the page never flashes the wrong theme */
     (function () {
         var KEY = "loadmind.ui";
         var DEFAULT_ACCENT = "#b9a7f5";
@@ -57,7 +57,7 @@
             }
             return "#" + [f(0), f(8), f(4)].map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join("");
         }
-        /* Any color the user picks gets nudged until it is readable on the current background. */
+        /* any color the user picks gets nudged until it is readable on the current background */
         function readable(hex, theme) {
             var bg = hexToRgb(BG[theme]);
             var hsl = rgbToHsl(hexToRgb(hex));

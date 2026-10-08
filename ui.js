@@ -1,4 +1,4 @@
-/* LoadMind UI layer: language, quote of the day, cursor, living dots, transitions. */
+/* LoadMind UI layer: language, quote of the day, cursor, living dots, transitions */
 (function () {
     const $ = s => document.querySelector(s);
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
