@@ -1,40 +1,45 @@
 # LoadMind
 
-A workload assistant for students. It turns tasks into a realistic daily plan and tells you when a day is too much.
+LoadMind helps students plan their day. You type in your tasks, it builds a realistic schedule and tells you when a day is simply too much.
 
-**Live demo:** https://loadmind.alena-anilove1970.workers.dev
+Live demo: https://loadmind.alena-anilove1970.workers.dev
 
 ![LoadMind dashboard](screenshots/dashboard.png)
 
 ## What it does
-- One-line task input in English and Russian: "SAT 4 hours 13:00-17:00" becomes a task with a start time, "by Friday 18:00" becomes a deadline.
-- A daily plan: hard tasks at your peak focus time, breaks after long sessions.
-- Overload Index (0-100) from open tasks, daily capacity and a short note about your day.
-- Coach: short advice from Gemini. The AI only advises, the schedule is built by plain rules.
-- Export to Google Calendar (.ics file or a link per task).
 
-| Smart input | Schedule | Russian UI |
-|---|---|---|
-| ![](screenshots/smart-input.png) | ![](screenshots/schedule.png) | ![](screenshots/russian.png) |
+You add a task in one line, in English or Russian. "SAT 4 hours 13:00-17:00" becomes a task with a start time, and "by Friday 18:00" becomes a deadline. From your open tasks LoadMind makes a plan for the day. Hard tasks are placed at the hours when you focus best, and long sessions are followed by a break. The schedule itself is built by plain rules.
+
+It also shows an Overload Index from 0 to 100. The number depends on how much work is still open, how many hours you can realistically handle in a day, and a short note you can write about how the day went. When you are happy with the plan, you can export it to Google Calendar, either as an .ics file or as a link for each task.
+
+<p>
+  <img src="screenshots/smart-input.png" width="32%" alt="Smart input">
+  <img src="screenshots/schedule.png" width="32%" alt="Schedule">
+  <img src="screenshots/russian.png" width="32%" alt="Russian interface">
+</p>
 
 ## How it works
-Task parsing is rule-based first and calls Gemini only when a phrase has no time or duration. Gemini is called through a Cloudflare Worker (`worker.js`), so the API key stays on the server.
 
-Files: `index.html` (markup), `script.js` (parser, plan, overload index, calendar export), `ui.js` (language, quote of the day, cursor, background), `style.css`, `worker.js` (AI proxy).
+It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index and the calendar export. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
 
-## Run locally
-Open `index.html`. To enable AI: deploy `worker.js` on Cloudflare Workers, add the secret `GEMINI_KEY` (optionally `GEMINI_MODEL`, `ALLOWED_ORIGIN`), and put the Worker URL into `AI_PROXY` in `script.js`.
+## Run it
+
+Open index.html in your browser. There is nothing to install.
 
 ## Research behind it
-- Peak focus time: [May, Hasher & Healey (2023)](https://journals.sagepub.com/doi/10.1177/17456916231178553)
-- Chronotype and grades are only loosely linked, so the user picks the peak: [Preckel et al. (2011)](https://eric.ed.gov/?id=EJ938525)
-- 15-minute breaks: [Albulescu et al. (2022)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9432722/)
+
+The idea of putting hard work at your peak focus time comes from May, Hasher and Healey (2023): https://journals.sagepub.com/doi/10.1177/17456916231178553
+
+Chronotype and grades turned out to be only loosely linked (Preckel et al., 2011), so LoadMind lets you choose your own peak time instead of guessing it: https://eric.ed.gov/?id=EJ938525
+
+The 15-minute breaks are based on Albulescu et al. (2022): https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9432722/
 
 ## Limits
-Data is stored in the browser only. The free AI quota is small. Note analysis falls back to keyword matching when AI is unavailable.
 
-## Next
-Accounts and a database, a custom NLP model trained on real notes, two-way calendar sync, Telegram reminders, Kazakh.
+Your tasks are stored only in your browser. They do not sync between devices, and clearing the site data will delete them.
 
-<!-- Add one honest line here about the AI tools you used, if the hackathon rules ask for it. -->
-Built solo by hassimx.
+## What I want to add next
+
+Accounts with a database, two-way calendar sync, Telegram reminders and a Kazakh interface.
+
+I built LoadMind on my own.
