@@ -263,7 +263,7 @@ function gcalLink(t) {
 // AI (through the Worker proxy; own key only when no proxy is set)
 
 // paste your deployed Worker URL here (see worker.js); with it, users need no API key
-const AI_PROXY = "https://loadmind-ai.alena-anilove1970.workers.dev";
+const AI_PROXY = "https://loadmind-ai.hassimx.workers.dev";
 const hasAI = () => !!(AI_PROXY || state.settings.key);
 
 const DEFAULT_MODEL = { gemini: "gemini-2.5-flash", anthropic: "claude-haiku-4-5-20251001" };
