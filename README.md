@@ -2,8 +2,6 @@
 
 LoadMind helps students plan their day. You type in your tasks, it builds a realistic schedule and tells you when a day is simply too much.
 
-Live demo: https://loadmind.alena-anilove1970.workers.dev
-
 ![LoadMind dashboard](screenshots/dashboard.png)
 
 ## What it does
