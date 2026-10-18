@@ -730,7 +730,8 @@ html.std .cursor { display: none; }
 /* priorities, deadline cushion, row buttons */
 .prio { font: 700 12px 'JetBrains Mono', monospace; color: var(--accent); margin-right: 8px; letter-spacing: .04em; }
 .task-name em.cushion { font: 500 11px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
-.task-name em.cushion.bad { color: var(--accent); font-weight: 700; }
+.task-name em.cushion.bad, .task-name em.cushion.tight { color: var(--accent); font-weight: 700; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .icon-btn.small { font-size: 14px; padding: 6px 8px; }
 .icon-btn.play:hover { color: var(--accent); }
 .task { grid-template-columns: 58px 1fr auto; align-items: start; }

@@ -59,7 +59,7 @@
     const num = t => t
         .replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
         .replace(/^Average (.+) a day$/, "В среднем $1 в день").replace(/^Focused on this task: (.+) of (.+)$/, "По задаче сделано: $1 из $2")
-        .replace(/^Won't fit · short by /, "Не успеваешь · не хватает ").replace(/^Tight · (.+) spare$/, "Впритык · запас $1")
+        .replace(/^Won't fit · short by /, "Не успеваешь · не хватает ").replace(/^Tight · (.+) spare$/, "Впритык · запас $1").replace(/^Cushion · (.+) spare$/, "Запас до дедлайна · $1")
         .replace(/^Capacity (.+) a day$/, "Ёмкость: $1 в день").replace(/^Overloaded days: /, "Перегруженных дней: ").replace(/^Deadlines at risk: /, "Дедлайнов под угрозой: ")
         .replace(/↻ every day/, "↻ каждый день").replace(/↻ weekdays/, "↻ по будням").replace(/↻ every week/, "↻ каждую неделю")
         .replace(/ · (\d+ h(?: \d+ min)?|\d+ min) done/, " · сделано $1").replace(/ · on (?=[A-Z])/, " · на ")

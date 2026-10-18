@@ -25,7 +25,7 @@ const fresh = () => ({
     settings: { name: "", start: "09:00", capacity: 8, peak: "morning", provider: "gemini", model: "", key: "", remind: false, pomoWork: 25, pomoShort: 5, pomoLong: 15, pomoEvery: 4 },
     focus: {},
     tasks: [
-        { id: 1, title: "SAT Math", minutes: 50, type: "exam", done: false, due: soon(1, 18) },
+        { id: 1, title: "SAT Math", minutes: 50, type: "exam", done: false, due: soon(1, 18), prio: 2 },
         { id: 2, title: "IELTS Reading", minutes: 45, type: "exam", done: false },
         { id: 3, title: "Volleyball", minutes: 120, type: "physical", done: false },
         { id: 4, title: "Light review", minutes: 25, type: "light", done: false }
@@ -590,10 +590,10 @@ function render() {
             + (t.repeat ? ` · ↻ ${REPEAT_NAME[t.repeat]}` : "") + (t.focus ? ` · ${dur(t.focus)} done` : "");
         if (di && di.cls) row.querySelector("small").classList.add(di.cls);
         const c = cushion(t);
-        if (c !== null && c < 60 && new Date(t.due) > new Date()) {
+        if (c !== null && new Date(t.due) > new Date()) {
             const em = document.createElement("em");
-            em.className = "cushion" + (c < 0 ? " bad" : "");
-            em.textContent = c < 0 ? `Won't fit · short by ${dur(-c)}` : `Tight · ${dur(c)} spare`;
+            em.className = "cushion" + (c < 0 ? " bad" : c < 60 ? " tight" : "");
+            em.textContent = c < 0 ? `Won't fit · short by ${dur(-c)}` : c < 60 ? `Tight · ${dur(c)} spare` : `Cushion · ${dur(c)} spare`;
             row.querySelector(".task-name").append(em);
         }
         if (t.due || t.at) cal.href = gcalLink(t); else cal.remove();

@@ -150,8 +150,6 @@
                 <div class="warning" id="warning">
                     <div class="warning-title" id="warningTitle"></div>
                     <p id="warningText"></p>
-                    <button class="secondary-button" data-action="unload" type="button" hidden>Unload today</button>
-                    <p class="hint unload-hint"></p>
                 </div>
 
         </section>
@@ -215,7 +213,8 @@
 
                 <div class="schedule" id="schedule"></div>
 
-                <div class="row-actions"><button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
+                <div class="row-actions"><button class="secondary-button" data-action="unload" data-always="1" type="button">Unload today</button> <button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
+                <p class="hint unload-hint"></p>
             </div>
 
         </section>
