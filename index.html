@@ -107,10 +107,13 @@
                 <button class="nav-item active" data-view="dashboard">Dashboard</button>
                 <button class="nav-item" data-view="tasks">My Tasks</button>
                 <button class="nav-item" data-view="schedule">Schedule</button>
+                <button class="nav-item" data-view="week">Week</button>
+                <button class="nav-item" data-view="focus">Focus</button>
                 <button class="nav-item" data-view="workload">Workload</button>
                 <button class="nav-item" data-view="settings">Settings</button>
             </nav>
             <div class="tools">
+                <button class="pomo-pill" id="pomoPill" type="button" title="Focus timer" hidden></button>
                 <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" class="on">EN</button><span>/</span><button type="button" data-lang="ru">RU</button></div>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
                     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -147,6 +150,8 @@
                 <div class="warning" id="warning">
                     <div class="warning-title" id="warningTitle"></div>
                     <p id="warningText"></p>
+                    <button class="secondary-button" data-action="unload" type="button" hidden>Unload today</button>
+                    <p class="hint unload-hint"></p>
                 </div>
 
         </section>
@@ -221,7 +226,7 @@
                 <input id="quickText" type="text" autocomplete="off" aria-label="Smart input" placeholder="Type a task: «SAT Math 1h tomorrow 18:00»">
                 <button class="primary-button" type="submit">Add</button>
             </form>
-            <p class="hint" id="quickHint">Duration, day and time are picked up automatically.</p>
+            <p class="hint" id="quickHint">Duration, day and time are picked up automatically. Add ! / !! / !!! for priority, «every day» or «по будням» to repeat.</p>
             <details class="manual">
                 <summary>Add manually</summary>
                 <form class="manual-form" id="taskForm">
@@ -235,10 +240,82 @@
                         <option value="physical">Physical</option>
                         <option value="light">Light</option>
                     </select></label>
+                    <label class="field">Priority <select id="taskPrio" aria-label="Priority">
+                        <option value="0">No priority</option>
+                        <option value="1">! Low</option>
+                        <option value="2">!! Important</option>
+                        <option value="3">!!! Urgent</option>
+                    </select></label>
+                    <label class="field">Repeat <select id="taskRepeat" aria-label="Repeat">
+                        <option value="">Does not repeat</option>
+                        <option value="daily">Every day</option>
+                        <option value="weekdays">Weekdays</option>
+                        <option value="weekly">Every week</option>
+                    </select></label>
                     <button class="primary-button" type="submit">Add task</button>
                 </form>
             </details>
             <div id="taskList"></div>
+        </section>
+
+        <section class="block" data-views="week">
+            <h2>Next 7 days</h2>
+            <div class="tags" id="weekSummary"></div>
+            <div class="week" id="week"></div>
+            <div class="row-actions"><button class="secondary-button" data-action="unload" data-always="1" type="button">Unload today</button></div>
+            <p class="hint unload-hint"></p>
+        </section>
+
+        <section class="block focus" data-views="focus">
+            <h2>Focus timer</h2>
+            <div class="pomo">
+                <div class="pomo-dial">
+                    <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="arc" id="pomoArc" cx="60" cy="60" r="54"/></svg>
+                    <div class="pomo-center" aria-live="polite">
+                        <span class="pomo-phase" id="pomoPhase"></span>
+                        <strong id="pomoTime">25:00</strong>
+                        <small id="pomoRound"></small>
+                    </div>
+                </div>
+                <div class="pomo-side">
+                    <div class="pomo-modes" role="group" aria-label="Timer mode">
+                        <button class="chip" type="button" data-phase="work">Focus</button>
+                        <button class="chip" type="button" data-phase="short">Short break</button>
+                        <button class="chip" type="button" data-phase="long">Long break</button>
+                    </div>
+                    <label class="field">Working on <select id="pomoTask"></select></label>
+                    <p class="pomo-task-note" id="pomoTaskNote"></p>
+                    <div class="pomo-buttons">
+                        <button class="primary-button" id="pomoStart" type="button">Start</button>
+                        <button class="secondary-button" id="pomoSkip" type="button">Finish early</button>
+                        <button class="secondary-button" id="pomoReset" type="button">Reset</button>
+                    </div>
+                    <p class="hint">Space starts and pauses. Lengths are in Settings.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid" data-views="focus">
+            <div class="stat-card">
+                <div class="stat-header"><span>Focus today</span></div>
+                <div class="stat-value"><strong id="focusTodayValue"></strong><span id="focusTodayUnit"></span></div>
+                <p id="focusTodayNote"></p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span>Last 7 days</span></div>
+                <div class="stat-value"><strong id="focusWeekValue"></strong><span id="focusWeekUnit"></span></div>
+                <p id="focusWeekNote"></p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span>Streak</span></div>
+                <div class="stat-value"><strong id="streakValue"></strong><span> days</span></div>
+                <p id="streakNote"></p>
+            </div>
+        </section>
+
+        <section class="block" data-views="focus">
+            <h2>Focus by day</h2>
+            <div class="focus-week" id="focusWeek"></div>
         </section>
 
         <section class="block" data-views="settings">
@@ -256,6 +333,11 @@
             <label class="setting">AI API key <input id="setKey" type="password" autocomplete="off" placeholder="Stays in this browser only"></label>
             </details>
             <label class="setting">Daily capacity (hours) <input id="setCapacity" type="number" min="1" max="16" step="0.5" value="8"></label>
+            <label class="setting">Reminders (browser notifications) <input id="setRemind" type="checkbox"></label>
+            <div class="setting"><span>Focus timer, minutes</span>
+                <span class="dur"><input id="setPomoWork" type="number" min="1" max="180" aria-label="Focus length"><em>focus</em><input id="setPomoShort" type="number" min="1" max="60" aria-label="Short break length"><em>break</em><input id="setPomoLong" type="number" min="1" max="90" aria-label="Long break length"><em>long break</em></span>
+            </div>
+            <label class="setting">Long break after (sessions) <input id="setPomoEvery" type="number" min="1" max="12"></label>
             <label class="setting">Background
                 <select id="setBg"><option value="network">Network</option><option value="lines">Lines</option><option value="off">Off</option></select>
             </label>
@@ -275,6 +357,7 @@
     </main>
 
     <script src="script.js"></script>
+    <script src="pomodoro.js"></script>
     <script src="ui.js"></script>
 
 </body>

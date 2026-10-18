@@ -37,11 +37,33 @@
         "Understands duration, day (today / tomorrow / weekday) and time, in English and Russian.": "Понимает длительность, день (сегодня / завтра / день недели) и время на русском и английском.",
         "Smart input: «SAT Math 1h tomorrow 18:00» or «сдать отчёт в пятницу в 18:00, 2 часа»": "Умный ввод: «SAT Math 1ч завтра 18:00» или «сдать отчёт в пятницу в 18:00, 2 часа»",
         "Task, e.g. SAT Reading": "Задача, например SAT Reading", "Task name": "Название", "Minutes": "Минуты", "Deadline": "Дедлайн", "Task type": "Тип",
-        "Optional": "Необязательно", "Switch theme": "Сменить тему", "Notes about your day": "Заметки о дне"
+        "Optional": "Необязательно", "Switch theme": "Сменить тему", "Notes about your day": "Заметки о дне",
+        "Week": "Неделя", "Focus": "Фокус", "Next 7 days": "Ближайшие 7 дней", "Unload today": "Разгрузить сегодня",
+        "Focus timer": "Таймер фокуса", "Short break": "Короткий перерыв", "Long break": "Длинный перерыв", "Timer mode": "Режим таймера",
+        "Working on": "Работаю над", "No task (free focus)": "Без задачи (просто фокус)", "Pick a task and the minutes count towards it.": "Выбери задачу, и минуты пойдут в её прогресс.",
+        "Start": "Старт", "Pause": "Пауза", "Resume": "Продолжить", "Finish early": "Закончить раньше", "Skip break": "Пропустить перерыв", "Reset": "Сброс",
+        "Space starts and pauses. Lengths are in Settings.": "Пробел — старт и пауза. Длительность меняется в настройках.",
+        "Focus today": "Фокус сегодня", "Last 7 days": "За 7 дней", "Streak": "Серия", "days": "дн.", "Focus by day": "Фокус по дням",
+        "Priority": "Приоритет", "Repeat": "Повтор", "No priority": "Без приоритета", "! Low": "! Низкий", "!! Important": "!! Важно", "!!! Urgent": "!!! Срочно",
+        "Low priority": "Низкий приоритет", "Important": "Важно", "Urgent": "Срочно",
+        "Does not repeat": "Без повтора", "Every day": "Каждый день", "Weekdays": "По будням", "Every week": "Каждую неделю",
+        "Reminders (browser notifications)": "Напоминания (уведомления браузера)", "Focus timer, minutes": "Таймер фокуса, минуты",
+        "focus": "фокус", "break": "перерыв", "long break": "длинный", "Long break after (sessions)": "Длинный перерыв после (сессий)",
+        "Focus length": "Длина фокуса", "Short break length": "Длина перерыва", "Long break length": "Длина длинного перерыва",
+        "Focus on this task": "Фокус на этой задаче", "Move to the next day": "Перенести на день вперёд", "Delete": "Удалить", "Delete task": "Удалить задачу",
+        "Add to Google Calendar": "Добавить в Google Календарь", "Sections": "Разделы",
+        "Duration, day and time are picked up automatically. Add ! / !! / !!! for priority, «every day» or «по будням» to repeat.": "Длительность, день и время подхватываются сами. Добавь ! / !! / !!! для приоритета, «каждый день» или «по будням» для повтора."
     };
     const LBL = { "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка", "Exam prep": "Экзамен" };
     const MO = { Jan: "янв", Feb: "фев", Mar: "мар", Apr: "апр", May: "мая", Jun: "июн", Jul: "июл", Aug: "авг", Sep: "сен", Oct: "окт", Nov: "ноя", Dec: "дек" }, WD = { Mon: "пн", Tue: "вт", Wed: "ср", Thu: "чт", Fri: "пт", Sat: "сб", Sun: "вс" }, LV = { Low: "Низкая", Normal: "Нормальная", High: "Высокая", Critical: "Критическая" };
-    const num = t => t.replace(/^(Exam prep|Study|Physical|Light) · /, (m, a) => ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a] + " · ").replace(/(Low|Normal|High|Critical) load/, (m, a) => LV[a] + " нагрузка").replace(/peak focus/, "пик концентрации").replace(/ at (?=[A-Z])/, " в ").replace(/fixed time/, "фиксированное время").replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? (\d+) (\w{3})/g, (m, w, d, mo) => `${WD[w]}, ${d} ${MO[mo] || mo}`).replace(/High concentration|Medium load|Physical load|Light load|Exam prep/g, m => LBL[m]).replace(/(\d+) open/, "$1 открыто").replace(/(\d+) h/g, "$1 ч").replace(/(\d+) min/g, "$1 мин").replace(" planned", " запланировано").replace(/ due /, " до ");
+    const num = t => t
+        .replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
+        .replace(/^Average (.+) a day$/, "В среднем $1 в день").replace(/^Focused on this task: (.+) of (.+)$/, "По задаче сделано: $1 из $2")
+        .replace(/^Won't fit · short by /, "Не успеваешь · не хватает ").replace(/^Tight · (.+) spare$/, "Впритык · запас $1")
+        .replace(/^Capacity (.+) a day$/, "Ёмкость: $1 в день").replace(/^Overloaded days: /, "Перегруженных дней: ").replace(/^Deadlines at risk: /, "Дедлайнов под угрозой: ")
+        .replace(/↻ every day/, "↻ каждый день").replace(/↻ weekdays/, "↻ по будням").replace(/↻ every week/, "↻ каждую неделю")
+        .replace(/ · (\d+ h(?: \d+ min)?|\d+ min) done/, " · сделано $1").replace(/ · on (?=[A-Z])/, " · на ")
+        .replace(/^(Exam prep|Study|Physical|Light) · /, (m, a) => ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a] + " · ").replace(/(Low|Normal|High|Critical) load/, (m, a) => LV[a] + " нагрузка").replace(/peak focus/, "пик концентрации").replace(/ at (?=[A-Z])/, " в ").replace(/fixed time/, "фиксированное время").replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? (\d+) (\w{3})/g, (m, w, d, mo) => `${WD[w]}, ${d} ${MO[mo] || mo}`).replace(/High concentration|Medium load|Physical load|Light load|Exam prep/g, m => LBL[m]).replace(/(\d+) open/, "$1 открыто").replace(/(\d+) h/g, "$1 ч").replace(/(\d+) min/g, "$1 мин").replace(" planned", " запланировано").replace(/ due /, " до ");
     const orig = new WeakMap(), origAttr = new WeakMap();
     let lang = localStorage.getItem("loadmind.lang") || "en";
     const norm = t => t.replace(/\s+/g, " ").trim();
