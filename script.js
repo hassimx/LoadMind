@@ -391,7 +391,7 @@ function gcalLink(t) {
 const AI_PROXY = "https://loadmind-ai.hassimx.workers.dev";
 const hasAI = () => !!(AI_PROXY || state.settings.key);
 
-const DEFAULT_MODEL = { gemini: "gemini-2.5-flash", anthropic: "claude-haiku-4-5-20251001" };
+const DEFAULT_MODEL = { gemini: "gemini-2.5-flash" };
 
 async function callAI(system, user) {
     if (AI_PROXY) {
@@ -400,20 +400,10 @@ async function callAI(system, user) {
         if (!r.ok) throw new Error(d.error || r.status);
         return d.text;
     }
-    const { provider, key } = state.settings;
-    const model = state.settings.model || DEFAULT_MODEL[provider];
+    const { key } = state.settings;
+    const model = state.settings.model || DEFAULT_MODEL.gemini;
     if (!key) throw new Error("No API key");
     let res, data;
-    if (provider === "anthropic") {
-        res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-            body: JSON.stringify({ model, max_tokens: 600, system, messages: [{ role: "user", content: user }] })
-        });
-        data = await res.json();
-        if (!res.ok) throw new Error(data.error?.message || res.status);
-        return data.content.map(c => c.text || "").join("");
-    }
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -684,7 +674,7 @@ $("quickForm").addEventListener("submit", async e => {
 });
 $("icsButton").addEventListener("click", exportICS);
 $("coachButton").addEventListener("click", askCoach);
-$("setProvider").addEventListener("change", e => { state.settings.provider = e.target.value; $("setModel").placeholder = DEFAULT_MODEL[e.target.value]; save(); });
+$("setProvider").addEventListener("change", e => { state.settings.provider = e.target.value; $("setModel").placeholder = DEFAULT_MODEL.gemini; save(); });
 $("setModel").addEventListener("change", e => { state.settings.model = e.target.value.trim(); save(); });
 $("setKey").addEventListener("change", e => { state.settings.key = e.target.value.trim(); save(); });
 $("setPeak").addEventListener("change", e => { state.settings.peak = e.target.value; save(); render(); });
@@ -812,9 +802,9 @@ function init() {
     $("setPomoLong").value = state.settings.pomoLong;
     $("setPomoEvery").value = state.settings.pomoEvery;
     fillDays();
-    $("setProvider").value = state.settings.provider;
+    $("setProvider").value = "gemini";
     $("setModel").value = state.settings.model;
-    $("setModel").placeholder = DEFAULT_MODEL[state.settings.provider];
+    $("setModel").placeholder = DEFAULT_MODEL.gemini;
     $("setKey").value = state.settings.key;
     if (AI_PROXY) $("advanced").hidden = true;
     
