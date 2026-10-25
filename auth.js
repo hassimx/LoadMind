@@ -3,8 +3,8 @@
 
 // Supabase -> Project Settings -> Data API (URL) and API Keys (publishable key).
 // Both are public and safe to keep here: every row is protected by row level security (supabase/schema.sql).
-const SUPABASE_URL = "";
-const SUPABASE_KEY = "";
+const SUPABASE_URL = "https://nstxupxrnwfmxdcmrbjy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_SwG_2MiHBgK5jp00zQPuYw_FPgMq5T_";
 
 (function () {
     const OWNER = "loadmind.owner";   // which account the data in this browser belongs to
