@@ -794,3 +794,34 @@ html.std .cursor { display: none; }
     .pomo-dial { width: min(280px, 78vw); }
     .pomo-side { width: 100%; }
 }
+
+/* account: button in the top bar + sign-in window */
+.account-btn { font: 500 11px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: none; border: 1px solid var(--ink-3); border-radius: 999px; padding: 6px 14px; cursor: pointer; white-space: nowrap; transition: border-color .2s, background .2s, color .2s; }
+.account-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.account-btn.in { text-transform: none; letter-spacing: .02em; border-color: var(--accent); }
+.account-btn.in::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
+.account-btn[data-status="saving"]::before { animation: pulse 1s ease-in-out infinite; }
+.account-btn[data-status="error"]::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+@keyframes pulse { 50% { opacity: .25; } }
+
+.auth-veil { position: fixed; inset: 0; z-index: 97; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--paper) 55%, transparent); backdrop-filter: blur(6px); animation: veil .25s ease-out; }
+@keyframes veil { from { opacity: 0; } }
+body.auth-open { overflow: hidden; }
+.auth-box { position: relative; width: min(420px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; background: var(--paper-raised); color: var(--ink); border: 1px solid var(--rule); border-radius: 14px; padding: 30px 28px 24px; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .45); animation: rise .45s cubic-bezier(.2, .8, .2, 1); }
+.auth-box h2 { font: 500 22px / 1.2 'Unbounded', sans-serif; letter-spacing: -.03em; margin: 0 36px 20px 0; }
+.auth-close { position: absolute; top: 14px; right: 14px; font-size: 22px; line-height: 1; padding: 4px 10px; }
+.auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.auth-form { display: grid; gap: 14px; }
+.auth-form input { width: 100%; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 11px 12px; font: 400 15px var(--sans); color: var(--ink); text-transform: none; letter-spacing: 0; }
+.auth-form input:hover { border-color: var(--ink-3); }
+.auth-form input:focus { border-color: var(--ink); outline: none; }
+.auth-form .primary-button { margin-top: 4px; width: 100%; }
+.link-btn { justify-self: start; background: none; border: 0; padding: 2px 0; color: var(--ink-3); font: 400 13px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link-btn:hover { color: var(--ink); }
+.auth-msg { min-height: 1.2em; margin: 14px 0 6px; font-size: 14px; color: var(--ink-2); }
+.auth-msg:empty { margin: 6px 0 0; }
+.auth-msg.bad { color: var(--ink); padding-left: 10px; border-left: 3px solid var(--accent); }
+.auth-who { font: 500 16px var(--sans); margin: 0 0 6px; word-break: break-all; }
+#authAbout { margin: 4px 0 0; }
+#authIn .secondary-button { margin-top: 4px; }
+@media (max-width: 760px) { .account-btn { padding: 5px 10px; } }

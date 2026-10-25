@@ -70,7 +70,7 @@
 
     function tr() {
         const ru = lang === "ru";
-        const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) || n.parentNode.closest(".quote") || !n.nodeValue.trim() ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+        const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) || n.parentNode.closest(".quote, [data-notr]") || !n.nodeValue.trim() ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
         for (let n; (n = w.nextNode());) {
             if (!orig.has(n) || (ru && n.nodeValue !== orig.get(n).out)) orig.set(n, { en: n.nodeValue });
             const o = orig.get(n);
@@ -79,6 +79,7 @@
             o.out = o.en.match(/^\s*/)[0] + out + o.en.match(/\s*$/)[0]; n.nodeValue = o.out;
         }
         document.querySelectorAll("[placeholder],[aria-label],[title]").forEach(el => {
+            if (el.closest("[data-notr]")) return; // texts there are set in both languages by their own script
             ["placeholder", "aria-label", "title"].forEach(a => {
                 if (!el.hasAttribute(a)) return;
                 const m = origAttr.get(el) || {}; if (!(a in m)) m[a] = el.getAttribute(a); origAttr.set(el, m);

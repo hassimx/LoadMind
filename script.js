@@ -42,7 +42,10 @@ function load() {
     } catch (e) {}
     return fresh();
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    if (window.LoadMindAuth) LoadMindAuth.queue(); // signed in: upload to the account (auth.js)
+}
 
 let state = load();
 let view = "dashboard";
@@ -385,19 +388,28 @@ function gcalLink(t) {
 }
 
 
-// AI (through the Worker proxy; own key only when no proxy is set)
+// AI (through the Worker proxy; with accounts on, only for signed-in users; own key as a fallback)
 
 // paste your deployed Worker URL here (see worker.js); with it, users need no API key
 const AI_PROXY = "https://loadmind-ai.hassimx.workers.dev";
-const hasAI = () => !!(AI_PROXY || state.settings.key);
+const authOn = () => !!(window.LoadMindAuth && LoadMindAuth.configured);
+const signedIn = () => !!(window.LoadMindAuth && LoadMindAuth.user);
+const useProxy = () => !!AI_PROXY && (!authOn() || signedIn() || !state.settings.key);
+const hasAI = () => (useProxy() ? !authOn() || signedIn() : !!state.settings.key);
 
-const DEFAULT_MODEL = { gemini: "gemini-2.5-flash" };
+const DEFAULT_MODEL = { gemini: "gemini-3.8-flash" };
 
 async function callAI(system, user) {
-    if (AI_PROXY) {
-        const r = await fetch(AI_PROXY, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, user }) });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || r.status);
+    if (useProxy()) {
+        const headers = { "content-type": "application/json" };
+        if (authOn()) {
+            const token = await LoadMindAuth.token();
+            if (!token) throw new Error("Sign in to use the AI");
+            headers.authorization = "Bearer " + token;
+        }
+        const r = await fetch(AI_PROXY, { method: "POST", headers, body: JSON.stringify({ system, user }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { const err = new Error(d.error || "HTTP " + r.status); err.status = r.status; throw err; }
         return d.text;
     }
     const { key } = state.settings;
@@ -440,9 +452,15 @@ async function analyzeNotesAI(text) {
 }
 
 async function askCoach() {
-    const out = $("coachOut"), btn = $("coachButton");
-    out.textContent = hasAI() ? "Thinking…" : "Add an API key in Settings first.";
-    if (!hasAI()) return;
+    const out = $("coachOut"), btn = $("coachButton"), ru = isRu();
+    if (!hasAI()) {
+        if (authOn()) {
+            out.textContent = ru ? "Войди или создай аккаунт, чтобы пользоваться ИИ-коучем. Это бесплатно." : "Sign in or create an account to use the AI coach. It's free.";
+            LoadMindAuth.open();
+        } else out.textContent = "Add an API key in Settings first.";
+        return;
+    }
+    out.textContent = ru ? "Думаю…" : "Thinking…";
     btn.disabled = true;
     try {
         const m = metrics();
@@ -454,12 +472,13 @@ async function askCoach() {
         };
         out.textContent = (await callAI(sys, JSON.stringify(data))).trim();
     } catch (e) {
-        const ru = localStorage.getItem("loadmind.lang") === "ru";
-        out.textContent = /fetch/i.test(e.message)
+        out.textContent = e.status === 401
+            ? (ru ? "Сессия закончилась. Войди в аккаунт ещё раз." : "Your session has ended. Sign in again.")
+            : /fetch/i.test(e.message)
             ? (ru ? "Не удалось связаться с ИИ-сервером. Открой сайт по его веб-адресу, а не файлом с компьютера, и проверь ALLOWED_ORIGIN в Worker." : "Can't reach the AI server. Open the site at its web address (not the file on your computer) and check ALLOWED_ORIGIN in the Worker.")
             : /quota|exhaust|rate|limit|429/i.test(e.message)
-            ? (ru ? "Дневной лимит ИИ закончился. Попробуй позже, обычно он обновляется раз в сутки." : "The daily AI limit is used up. Try again later, it usually resets once a day.")
-            : "AI request failed: " + e.message;
+            ? (ru ? "Дневной лимит ИИ закончился. Он обновляется раз в сутки, попробуй завтра." : "The daily AI limit is used up. It resets once a day, try again tomorrow.")
+            : (ru ? "Ошибка ИИ: " : "AI request failed: ") + e.message;
     }
     btn.disabled = false;
 }

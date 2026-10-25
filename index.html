@@ -114,6 +114,7 @@
             </nav>
             <div class="tools">
                 <button class="pomo-pill" id="pomoPill" type="button" title="Focus timer" hidden></button>
+                <button class="account-btn" id="accountBtn" type="button" data-notr hidden>Sign in</button>
                 <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" class="on">EN</button><span>/</span><button type="button" data-lang="ru">RU</button></div>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
                     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -350,12 +351,50 @@
                     <input id="accentPicker" type="color" aria-label="Custom accent color" title="Pick any color">
                 </div>
             </div>
-            <div class="setting"><span>Everything is stored in this browser only.</span><button class="secondary-button" id="resetButton">Reset tasks and notes</button></div>
+            <div class="setting"><span id="storageNote" data-notr>Everything is stored in this browser only.</span><button class="secondary-button" id="resetButton">Reset tasks and notes</button></div>
         </section>
 
     </main>
 
+    <div class="auth-veil" id="authVeil" data-notr hidden>
+        <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+            <button class="icon-btn auth-close" id="authClose" type="button" aria-label="Close">×</button>
+            <h2 id="authTitle">Sign in</h2>
+
+            <div id="authOut">
+                <div class="auth-tabs" role="group" aria-label="Account">
+                    <button class="chip" id="tabIn" type="button" aria-pressed="true">Sign in</button>
+                    <button class="chip" id="tabUp" type="button" aria-pressed="false">Create account</button>
+                </div>
+                <form class="auth-form" id="authForm" novalidate>
+                    <label class="field" id="authEmailLabel">Email <input id="authEmail" type="email" autocomplete="email" inputmode="email" required></label>
+                    <label class="field" id="authPassLabel">Password <input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
+                    <button class="primary-button" id="authSubmit" type="submit">Sign in</button>
+                    <button class="link-btn" id="authForgot" type="button">Forgot password?</button>
+                </form>
+                <p class="auth-msg" id="authMsg" aria-live="polite"></p>
+                <p class="hint" id="authAbout"></p>
+            </div>
+
+            <div id="authIn" hidden>
+                <p class="auth-who" id="authWho"></p>
+                <p class="hint" id="authSync" aria-live="polite"></p>
+                <button class="secondary-button" id="authOutBtn" type="button">Sign out</button>
+            </div>
+
+            <div id="authNew" hidden>
+                <form class="auth-form" id="authNewForm" novalidate>
+                    <label class="field" id="authNewPassLabel">New password <input id="authNewPass" type="password" autocomplete="new-password" minlength="6"></label>
+                    <button class="primary-button" id="authNewSave" type="submit">Save password</button>
+                </form>
+                <p class="auth-msg" id="authNewMsg" aria-live="polite"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+    <script src="auth.js"></script>
     <script src="pomodoro.js"></script>
     <script src="ui.js"></script>
 

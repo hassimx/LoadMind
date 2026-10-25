@@ -16,6 +16,12 @@ It also shows an Overload Index from 0 to 100. The number depends on how much wo
 
 The Focus tab has a Pomodoro timer: 25 minutes of work, a 5 minute break, and a longer break after every fourth session (all of it can be changed in Settings). You pick a task, or press ▶ next to it, and the minutes go into that task's progress, so the plan only counts the time that is still left. The tab also shows focus time for today and the last 7 days, and a streak of days with at least one session. The timer keeps going after a reload, plays a short sound at the end and shows a notification if you allow it.
 
+### Accounts
+
+You can use LoadMind as a guest, and then everything stays in your browser. If you create an account (email and password), your tasks, settings and focus history are saved to the database and sync between your phone and laptop. When you sign in on a device that already has tasks, LoadMind asks whether to add them to your account. Signing out clears the data from that browser, so it is safe on a shared computer.
+
+The AI coach works for signed-in users. Each account has a daily limit of AI requests.
+
 ### Planning tools
 
 - Priorities: add `!`, `!!` or `!!!` (or `p1`–`p3`, «срочно», «важно») to a task. Important tasks go first in the plan.
@@ -33,11 +39,19 @@ The Focus tab has a Pomodoro timer: 25 minutes of work, a 5 minute break, and a 
 
 ## How it works
 
-It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
+It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
+
+Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the Gemini key off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini.
 
 ## Run it
 
-Open index.html in your browser. There is nothing to install.
+Open index.html in your browser. There is nothing to install. Without Supabase settings in auth.js the app runs in guest mode.
+
+To run your own copy with accounts:
+
+1. Create a Supabase project and run supabase/schema.sql in its SQL Editor.
+2. Put the project URL and the publishable key into the top of auth.js.
+3. Deploy worker.js as a Cloudflare Worker with the variables listed at the top of the file, and put its URL into AI_PROXY in script.js.
 
 ## Research behind it
 
@@ -49,10 +63,10 @@ The 15-minute breaks are based on Albulescu et al. (2022): https://www.ncbi.nlm.
 
 ## Limits
 
-Your tasks are stored only in your browser. They do not sync between devices, and clearing the site data will delete them.
+Without an account your tasks are stored only in your browser, and clearing the site data will delete them. With an account the last change wins: if you edit the same day on two devices at the same moment, the later save is kept.
 
 ## What I want to add next
 
-Accounts with a database, two-way calendar sync, Telegram reminders (they would also work when the page is closed) and a Kazakh interface.
+Sign in with Google, two-way calendar sync, Telegram reminders (they would also work when the page is closed) and a Kazakh interface.
 
 I built LoadMind on my own.
