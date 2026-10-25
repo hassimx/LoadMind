@@ -254,7 +254,9 @@ const SUPABASE_KEY = "sb_publishable_SwG_2MiHBgK5jp00zQPuYw_FPgMq5T_";
                 msg(""); $("authPass").value = ""; close();
             }
         } catch (err) {
-            msg(explain(err), true);
+            const known = /already registered|already exists/i.test((err && err.message) || "");
+            if (known) { mode = "in"; paint(); }
+            msg(known ? T("You already have an account with this email. Type your password and press Sign in.", "У тебя уже есть аккаунт на эту почту. Введи пароль и нажми «Войти».") : explain(err), true);
         }
         go.disabled = false;
     });

@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="style.css">
 
     <script>
+    /* one address for everyone: the old workers.dev address moves to loadmind.dev, so sign-ins and data stay in one place */
+    if (location.hostname === "loadmind.hassimx.workers.dev") location.replace("https://loadmind.dev" + location.pathname + location.search + location.hash);
+    </script>
+
+    <script>
     /* theme + accent color; runs in <head> so the page never flashes the wrong theme */
     (function () {
         var KEY = "loadmind.ui";
