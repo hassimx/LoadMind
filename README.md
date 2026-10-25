@@ -41,7 +41,7 @@ The AI coach works for signed-in users. Each account has a daily limit of AI req
 
 It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
 
-Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the Gemini key off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini.
+Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the AI keys off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini. Gemini is reached through OpenRouter, and Google's free tier is the backup when OpenRouter is not set or fails.
 
 ## Run it
 
