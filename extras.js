@@ -4,7 +4,7 @@
 // Google Cloud Console -> APIs & Services -> Credentials -> OAuth client ID (Web application).
 // Authorized JavaScript origins: https://loadmind.dev  (and http://localhost:8000 for testing).
 // Without it the .ics import still works.
-const GOOGLE_CLIENT_ID = "";
+const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.googleusercontent.com";
 
 (function () {
     const T = (en, ru) => (isRu() ? ru : en);
