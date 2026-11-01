@@ -23,7 +23,7 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         if (done && !t.doneAt) { t.doneAt = today; state.log[today] = (state.log[today] || 0) + 1; }
         if (!done && t.doneAt) { const d = t.doneAt; state.log[d] = Math.max(0, (state.log[d] || 0) - 1); if (!state.log[d]) delete state.log[d]; delete t.doneAt; }
         origSetDone(t, done);
-        if (done) setTimeout(() => { checkBadges(true); if ((state.log[today] || 0) === DAILY_GOAL) { toast(T("Daily goal reached! 🎯", "Цель дня выполнена! 🎯")); confetti(); } }, 50);
+        if (done) setTimeout(() => { checkBadges(true); if ((state.log[today] || 0) === DAILY_GOAL) { toast("◎ " + T("Daily goal reached!", "Цель дня выполнена!")); confetti(); } }, 50);
     };
 
     const active = d => (state.log && state.log[d] > 0) || (state.focus && state.focus[d] && state.focus[d].m > 0);
@@ -50,18 +50,18 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
 
     // ---------- achievements ----------
     const BADGES = [
-        ["first", "🌱", "First step", "Первый шаг", "Finish your first task", "Закрой первую задачу", s => s.tasks >= 1],
-        ["ten", "🔟", "Ten done", "Десятка", "Finish 10 tasks", "Закрой 10 задач", s => s.tasks >= 10],
-        ["fifty", "🏔️", "Mountain mover", "Двигаешь горы", "Finish 50 tasks", "Закрой 50 задач", s => s.tasks >= 50],
-        ["goal", "🎯", "On target", "В яблочко", `Finish ${DAILY_GOAL} tasks in one day`, `Закрой ${DAILY_GOAL} задачи за день`, () => (state.log[todayStr()] || 0) >= DAILY_GOAL],
-        ["streak3", "🔥", "Warming up", "Разогрев", "3 days in a row", "3 дня подряд", s => s.streak >= 3],
-        ["streak7", "⚡", "Unstoppable week", "Неделя без пауз", "7 days in a row", "7 дней подряд", s => s.streak >= 7],
-        ["streak30", "👑", "Habit made", "Привычка готова", "30 days in a row", "30 дней подряд", s => s.streak >= 30],
-        ["focus1", "⏱️", "Deep work", "Глубокая работа", "1 hour in the focus timer", "1 час в таймере фокуса", s => s.focusMin >= 60],
-        ["focus10", "🧠", "Focus master", "Мастер фокуса", "10 hours in the focus timer", "10 часов в таймере фокуса", s => s.focusMin >= 600],
-        ["early", "🌅", "Early bird", "Ранняя пташка", "Finish a task before 9:00", "Закрой задачу до 9:00", () => new Date().getHours() < 9 && (state.log[todayStr()] || 0) > 0],
-        ["calendar", "📅", "Connected", "На связи", "Import your Google Calendar", "Импортируй Google Календарь", () => !!state.gcalImported],
-        ["calm", "🧘", "Calm day", "Спокойный день", "Keep the overload index under 50 with 3+ tasks done", "Индекс перегрузки ниже 50 и 3+ задачи", () => metrics().index < 50 && (state.log[todayStr()] || 0) >= 3]
+        ["first", "✓", "First step", "Первый шаг", "Finish your first task", "Закрой первую задачу", s => s.tasks >= 1],
+        ["ten", "10", "Ten done", "Десятка", "Finish 10 tasks", "Закрой 10 задач", s => s.tasks >= 10],
+        ["fifty", "50", "Mountain mover", "Двигаешь горы", "Finish 50 tasks", "Закрой 50 задач", s => s.tasks >= 50],
+        ["goal", "◎", "On target", "В яблочко", `Finish ${DAILY_GOAL} tasks in one day`, `Закрой ${DAILY_GOAL} задачи за день`, () => (state.log[todayStr()] || 0) >= DAILY_GOAL],
+        ["streak3", "△", "Warming up", "Разогрев", "3 days in a row", "3 дня подряд", s => s.streak >= 3],
+        ["streak7", "▲", "Unstoppable week", "Неделя без пауз", "7 days in a row", "7 дней подряд", s => s.streak >= 7],
+        ["streak30", "◆", "Habit made", "Привычка готова", "30 days in a row", "30 дней подряд", s => s.streak >= 30],
+        ["focus1", "1h", "Deep work", "Глубокая работа", "1 hour in the focus timer", "1 час в таймере фокуса", s => s.focusMin >= 60],
+        ["focus10", "10h", "Focus master", "Мастер фокуса", "10 hours in the focus timer", "10 часов в таймере фокуса", s => s.focusMin >= 600],
+        ["early", "↑", "Early bird", "Ранняя пташка", "Finish a task before 9:00", "Закрой задачу до 9:00", () => new Date().getHours() < 9 && (state.log[todayStr()] || 0) > 0],
+        ["calendar", "⇄", "Connected", "На связи", "Import your Google Calendar", "Импортируй Google Календарь", () => !!state.gcalImported],
+        ["calm", "≈", "Calm day", "Спокойный день", "Keep the overload index under 50 with 3+ tasks done", "Индекс перегрузки ниже 50 и 3+ задачи", () => metrics().index < 50 && (state.log[todayStr()] || 0) >= 3]
     ];
     function checkBadges(loud) {
         ensure();
@@ -287,7 +287,7 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         box.replaceChildren();
         // streak
         const a = el("div", "lm-card");
-        a.append(el("small", "", T("Streak", "Серия")), el("strong", "", `🔥 ${st}`), el("p", "", active(todayStr())
+        a.append(el("small", "", T("Streak", "Серия")), el("strong", "", `▲ ${st}`), el("p", "", active(todayStr())
             ? T("Today counts. Come back tomorrow to keep it.", "Сегодня засчитано. Вернись завтра, чтобы не прервать.")
             : st ? T("Finish one task today or the streak resets.", "Закрой одну задачу сегодня, иначе серия сгорит.") : T("Finish one task to start a streak.", "Закрой одну задачу, чтобы начать серию.")));
         if (!active(todayStr()) && st) a.classList.add("risk");
