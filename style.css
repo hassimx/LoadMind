@@ -825,3 +825,52 @@ body.auth-open { overflow: hidden; }
 #authAbout { margin: 4px 0 0; }
 #authIn .secondary-button { margin-top: 4px; }
 @media (max-width: 760px) { .account-btn { padding: 5px 10px; } }
+
+/* today strip: streak, daily goal, level, next up (extras.js) */
+.lm-today-block { padding-top: 8px; }
+.lm-recap { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.lm-recap:empty { display: none; }
+.lm-today { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.lm-card { border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; transition: transform .45s cubic-bezier(.2, .8, .2, 1), border-color .3s; }
+.lm-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.lm-card small { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.lm-card strong { font: 500 30px/1.1 var(--display); letter-spacing: -.03em; }
+.lm-card p { color: var(--ink-2); font-size: 13px; margin: 0; }
+.lm-card.risk { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.lm-next-title { font-size: 18px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lm-next .secondary-button { margin-top: auto; padding: 10px 14px; align-self: flex-start; }
+.lm-ring { --p: 0; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--accent) calc(var(--p) * 1%), color-mix(in srgb, var(--ink) 12%, transparent) 0); }
+.lm-ring span { width: 50px; height: 50px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; font: 500 14px var(--mono); }
+.lm-bar { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 12%, transparent); overflow: hidden; margin: 4px 0; }
+.lm-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .6s; }
+@media (max-width: 900px) { .lm-today { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .lm-today { grid-template-columns: 1fr; } }
+
+/* lifehack of the day */
+.lm-tips { display: flex; flex-direction: column; gap: 10px; border-left: 3px solid var(--accent); padding-left: 20px; }
+.lm-tip-cat { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.lm-tips .link-btn { align-self: flex-start; }
+.lm-tip-text { font-size: 18px; line-height: 1.45; margin: 0; max-width: 62ch; }
+.lm-tip-ctx { margin: 0; padding: 10px 14px; border-radius: 8px; background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 500; }
+
+/* achievements */
+.lm-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.lm-badge { border: 1px dashed var(--rule); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px; opacity: .55; filter: grayscale(1); transition: transform .3s; }
+.lm-badge.got { opacity: 1; filter: none; border-style: solid; border-color: var(--accent); }
+.lm-badge.got:hover { transform: translateY(-3px); }
+.lm-badge-ico { font-size: 24px; }
+.lm-badge b { font-size: 14px; font-weight: 600; }
+.lm-badge small { color: var(--ink-3); font-size: 12px; }
+
+/* calendar block */
+.lm-cal .row-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.lm-src { font-style: normal; color: var(--ink-3); font-size: 12px; }
+
+/* toasts + confetti */
+.lm-toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 100; max-width: calc(100vw - 32px); }
+.lm-toast { background: var(--ink); color: var(--paper); padding: 12px 16px; border-radius: 10px; font-weight: 500; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5); animation: lmIn .35s cubic-bezier(.2, .8, .2, 1); transition: opacity .5s, transform .5s; }
+.lm-toast.out { opacity: 0; transform: translateY(10px); }
+@keyframes lmIn { from { opacity: 0; transform: translateY(14px); } }
+.lm-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 99; overflow: hidden; }
+.lm-confetti i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; animation: lmFall 2.2s cubic-bezier(.3, .6, .4, 1) forwards; }
+@keyframes lmFall { to { top: 105vh; transform: translateX(40px) rotate(540deg); } }

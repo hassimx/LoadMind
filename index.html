@@ -136,6 +136,11 @@
             <p class="subtitle" id="summary"></p>
         </header>
 
+        <section class="block lm-today-block" data-views="dashboard" data-notr>
+            <p class="lm-recap" id="lmRecap"></p>
+            <div class="lm-today" id="lmToday"></div>
+        </section>
+
         <section class="block" data-views="dashboard workload">
             <div class="overload-header">
                 <div>
@@ -163,6 +168,13 @@
         <section class="quote" data-views="dashboard">
             <small id="quoteMeta"></small>
             <p id="quoteText"></p>
+        </section>
+
+        <section class="block lm-tips" id="lmTips" data-views="dashboard" data-notr>
+            <p class="lm-tip-ctx" hidden></p>
+            <small class="lm-tip-cat"></small>
+            <p class="lm-tip-text"></p>
+            <button class="link-btn lm-tip-next" type="button"></button>
         </section>
 
         <section class="block coach" data-views="dashboard">
@@ -323,6 +335,23 @@
             <div class="focus-week" id="focusWeek"></div>
         </section>
 
+        <section class="block lm-cal" id="lmCal" data-views="schedule week settings" data-notr>
+            <h2>Google Calendar</h2>
+            <p class="hint lm-cal-about"></p>
+            <div class="row-actions">
+                <button class="primary-button" id="calGoogle" type="button" hidden></button>
+                <button class="secondary-button" id="calFileBtn" type="button"></button>
+                <button class="secondary-button" id="calRemove" type="button" hidden></button>
+                <input id="calFile" type="file" accept=".ics,text/calendar" hidden>
+            </div>
+            <p class="hint" id="calMsg" aria-live="polite"></p>
+        </section>
+
+        <section class="block lm-badges-block" data-views="dashboard focus" data-notr>
+            <h2 id="lmBadgesHead">Achievements</h2>
+            <div class="lm-badges" id="lmBadges"></div>
+        </section>
+
         <section class="block" data-views="settings">
             <h2>Settings</h2>
             <label class="setting">Your name <input id="setName" type="text" placeholder="Optional"></label>
@@ -401,6 +430,7 @@
     <script src="script.js"></script>
     <script src="auth.js"></script>
     <script src="pomodoro.js"></script>
+    <script src="extras.js"></script>
     <script src="ui.js"></script>
 
 </body>

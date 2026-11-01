@@ -16,6 +16,17 @@ It also shows an Overload Index from 0 to 100. The number depends on how much wo
 
 The Focus tab has a Pomodoro timer: 25 minutes of work, a 5 minute break, and a longer break after every fourth session (all of it can be changed in Settings). You pick a task, or press ▶ next to it, and the minutes go into that task's progress, so the plan only counts the time that is still left. The tab also shows focus time for today and the last 7 days, and a streak of days with at least one session. The timer keeps going after a reload, plays a short sound at the end and shows a notification if you allow it.
 
+### Google Calendar
+
+Events from Google Calendar come into LoadMind as tasks with a fixed time, so the plan for the day is built around your lessons and trainings. You can import the .ics file that Google Calendar exports (Settings → Import & export). With a Google OAuth client ID in extras.js, LoadMind connects to Google Calendar directly and syncs both ways: events come in, and LoadMind tasks with a time or a deadline go out. It syncs again when you come back to the tab.
+
+### Coming back every day
+
+- The dashboard shows a daily streak (days with a finished task or a focus session), a daily goal of 3 tasks, your level and XP, and the next task in the plan with a button to start focusing on it.
+- Achievements for the first task, streaks of 3, 7 and 30 days, focus hours and more, with a small celebration when you unlock one.
+- A weekly recap compares this week with the last one, and a welcome-back line appears after a break.
+- A study lifehack of the day (memory, focus, sleep, exams, planning), plus a tip that reacts to your day: an overloaded day, a deadline within 24 hours, or a late hour.
+
 ### Accounts
 
 You can use LoadMind as a guest, and then everything stays in your browser. If you create an account (email and password), your tasks, settings and focus history are saved to the database and sync between your phone and laptop. When you sign in on a device that already has tasks, LoadMind asks whether to add them to your account. Signing out clears the data from that browser, so it is safe on a shared computer.
@@ -39,7 +50,7 @@ The AI coach works for signed-in users. Each account has a daily limit of AI req
 
 ## How it works
 
-It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
+It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
 
 Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the AI keys off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini. Gemini is reached through OpenRouter, and Google's free tier is the backup when OpenRouter is not set or fails.
 
@@ -67,6 +78,6 @@ Without an account your tasks are stored only in your browser, and clearing the 
 
 ## What I want to add next
 
-Sign in with Google, two-way calendar sync, Telegram reminders (they would also work when the page is closed) and a Kazakh interface.
+Sign in with Google, Telegram reminders (they would also work when the page is closed) and a Kazakh interface.
 
 I built LoadMind on my own.
