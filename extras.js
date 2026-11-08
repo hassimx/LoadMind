@@ -114,45 +114,76 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
 
     // ---------- Google Calendar import ----------
     const ICS_WINDOW_DAYS = 14;
+    // wall-clock time in a named time zone (TZID=Europe/Moscow) -> the real moment, so events land at the right hour here
+    function zoned(y, mo, d, h, mi, tz) {
+        const guess = Date.UTC(y, mo - 1, d, h, mi);
+        try {
+            const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric" })
+                .formatToParts(new Date(guess)).map(x => [x.type, x.value]));
+            return new Date(guess - (Date.UTC(+p.year, p.month - 1, +p.day, +p.hour % 24, +p.minute) - guess));
+        } catch (e) { return new Date(y, mo - 1, d, h, mi); } // unknown zone: read it as local time
+    }
     function parseIcsDate(v, params) {
         if (/VALUE=DATE(?!-)/.test(params) || /^\d{8}$/.test(v)) return null; // all-day: skipped
         const m = v.match(/^(\d{4})(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)?(Z)?$/);
         if (!m) return null;
-        return m[7] ? new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5])) : new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]);
+        const tz = (params.match(/TZID=([^;:]+)/) || [])[1];
+        if (m[7]) return new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5]));
+        if (tz) return zoned(+m[1], +m[2], +m[3], +m[4], +m[5], tz.replace(/^"|"$/g, ""));
+        return new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]);
     }
     function parseICS(text) {
         const lines = text.replace(/\r\n[ \t]/g, "").replace(/\n[ \t]/g, "").split(/\r?\n/);
         const out = []; let ev = null;
         for (const line of lines) {
-            if (line === "BEGIN:VEVENT") { ev = {}; continue; }
+            if (line === "BEGIN:VEVENT") { ev = { EXDATES: [] }; continue; }
             if (line === "END:VEVENT") { if (ev) out.push(ev); ev = null; continue; }
             if (!ev) continue;
             const i = line.indexOf(":"); if (i < 0) continue;
             const head = line.slice(0, i), value = line.slice(i + 1), [name, ...params] = head.split(";");
+            // a repeating event can have several EXDATE lines (deleted days), each with one or more dates
+            if (name === "EXDATE") { value.split(",").forEach(v => ev.EXDATES.push(parseIcsDate(v, params.join(";")) || v.slice(0, 8))); continue; }
             ev[name] = value; ev[name + "_p"] = params.join(";");
         }
         return out;
     }
-    function expand(ev, from, to) {
+    const dayKey = d => toLocalInput(d).slice(0, 10).replace(/-/g, "");
+    // moved = "UID|time" of single days of a repeating event that were changed in Google (they come as their own events)
+    function expand(ev, from, to, moved) {
         const start = parseIcsDate(ev.DTSTART || "", ev.DTSTART_p || "");
         if (!start || (ev.STATUS || "").toUpperCase() === "CANCELLED") return [];
         const end = parseIcsDate(ev.DTEND || "", ev.DTEND_p || "");
         const minutes = end ? Math.round((end - start) / 6e4) : 60;
         const items = [], rr = ev.RRULE || "";
         const freq = (rr.match(/FREQ=(\w+)/) || [])[1], until = (rr.match(/UNTIL=([0-9TZ]+)/) || [])[1], count = +(rr.match(/COUNT=(\d+)/) || [])[1] || 0;
-        const days = ((rr.match(/BYDAY=([A-Z,]+)/) || [])[1] || "").split(",").filter(Boolean).map(d => ["SU", "MO", "TU", "WE", "TH", "FR", "SA"].indexOf(d.slice(-2)));
+        const every = Math.max(1, +(rr.match(/INTERVAL=(\d+)/) || [])[1] || 1);
+        const days = ((rr.match(/BYDAY=([A-Z0-9,+-]+)/) || [])[1] || "").split(",").filter(Boolean).map(d => ["SU", "MO", "TU", "WE", "TH", "FR", "SA"].indexOf(d.slice(-2)));
         const stop = until ? parseIcsDate(until.length === 8 ? until + "T235900" : until, "") || to : to;
+        const skip = d => ev.EXDATES.some(x => (x instanceof Date ? Math.abs(x - d) < 6e4 : x === dayKey(d))) || (moved && moved.has(ev.UID + "|" + d.getTime()));
         if (!freq || !["DAILY", "WEEKLY"].includes(freq)) { if (start >= from && start <= to) items.push(start); }
         else {
-            let n = 0;
-            for (let d = new Date(start); d <= to && d <= stop; d.setDate(d.getDate() + 1)) {
-                const ok = freq === "DAILY" || (days.length ? days.includes(d.getDay()) : d.getDay() === start.getDay());
+            const first = toLocalInput(start).slice(0, 10), monday0 = (start.getDay() + 6) % 7; // weeks start on Monday
+            let n = 0, d = new Date(start);
+            // old repeating events (lessons since September): jump close to today, unless COUNT needs every past day counted
+            if (!count && start < from) d.setDate(d.getDate() + Math.max(0, daysBetween(first, toLocalInput(from).slice(0, 10)) - 1));
+            for (; d <= to && d <= stop; d.setDate(d.getDate() + 1)) {
+                const i = daysBetween(first, toLocalInput(d).slice(0, 10));
+                const ok = freq === "DAILY" ? i % every === 0
+                    : Math.floor((i + monday0) / 7) % every === 0 && (days.length ? days.includes(d.getDay()) : d.getDay() === start.getDay());
                 if (!ok) continue;
                 n++; if (count && n > count) break;
-                if (d >= from) items.push(new Date(d));
+                if (d >= from && !skip(d)) items.push(new Date(d));
             }
         }
         return items.map(s => ({ ext: (ev.UID || ev.SUMMARY) + "|" + s.toISOString(), title: (ev.SUMMARY || "Event").replace(/\\([,;\\])/g, "$1").replace(/\\n/gi, " "), start: s, minutes: Math.max(5, Math.min(720, minutes)) }));
+    }
+    // all events of one or more calendars, with repeating events unrolled for the next ICS_WINDOW_DAYS days
+    function eventsFromIcs(texts) {
+        const from = new Date(); from.setHours(0, 0, 0, 0);
+        const to = new Date(from); to.setDate(to.getDate() + ICS_WINDOW_DAYS);
+        const all = texts.flatMap(parseICS), moved = new Set();
+        all.forEach(ev => { if (ev["RECURRENCE-ID"]) { const t = parseIcsDate(ev["RECURRENCE-ID"], ev["RECURRENCE-ID_p"] || ""); if (t) moved.add(ev.UID + "|" + t.getTime()); } });
+        return all.flatMap(ev => expand(ev, from, to, ev["RECURRENCE-ID"] ? null : moved));
     }
     // put events into LoadMind as fixed-time tasks (busy blocks the planner works around)
     function mergeEvents(events, source, removeMissing) {
@@ -175,16 +206,45 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         save(); render(); checkBadges(true);
         return { added, updated, removed };
     }
-    function importIcsFile(file) {
-        const r = new FileReader();
-        r.onload = () => {
-            const from = new Date(); from.setHours(0, 0, 0, 0);
-            const to = new Date(from); to.setDate(to.getDate() + ICS_WINDOW_DAYS);
-            const events = parseICS(String(r.result)).flatMap(ev => expand(ev, from, to));
+    // Google Calendar exports a .zip with one .ics per calendar. It is opened right here, so nobody has to unzip it first.
+    async function unzipIcs(buf) {
+        const v = new DataView(buf), out = [];
+        let e = buf.byteLength - 22;
+        while (e >= 0 && v.getUint32(e, true) !== 0x06054b50) e--;
+        if (e < 0) throw new Error("zip");
+        let p = v.getUint32(e + 16, true);
+        for (let i = 0, n = v.getUint16(e + 10, true); i < n && v.getUint32(p, true) === 0x02014b50; i++) {
+            const method = v.getUint16(p + 10, true), size = v.getUint32(p + 20, true), nameLen = v.getUint16(p + 28, true), local = v.getUint32(p + 42, true);
+            const name = new TextDecoder().decode(new Uint8Array(buf, p + 46, nameLen));
+            p += 46 + nameLen + v.getUint16(p + 30, true) + v.getUint16(p + 32, true);
+            if (!/\.ics$/i.test(name)) continue;
+            const data = new Uint8Array(buf, local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true), size);
+            if (method === 0) out.push(new TextDecoder().decode(data));
+            else if (method === 8) out.push(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text());
+        }
+        return out;
+    }
+    async function importIcsFiles(files) {
+        calMsg(T("Reading the file…", "Читаю файл…"));
+        try {
+            const texts = [];
+            for (const f of files) {
+                const buf = await f.arrayBuffer(), head = new Uint8Array(buf, 0, Math.min(4, buf.byteLength));
+                if (head[0] === 0x50 && head[1] === 0x4b && head[2] === 3 && head[3] === 4) texts.push(...await unzipIcs(buf)); // "PK": a zip
+                else texts.push(new TextDecoder().decode(buf));
+            }
+            if (!texts.some(t => t.includes("BEGIN:VCALENDAR"))) { calMsg(T("This is not a calendar file. Pick the .zip or .ics that Google Calendar exported.", "Это не файл календаря. Выбери .zip или .ics, который выгрузил Google Календарь.")); return; }
+            const events = eventsFromIcs(texts);
+            if (!events.length) { calMsg(T(`The file has no events with a time in the next ${ICS_WINDOW_DAYS} days (all-day events are skipped).`, `В файле нет событий со временем на ближайшие ${ICS_WINDOW_DAYS} дней (события на весь день пропускаются).`)); return; }
             const res = mergeEvents(events, "ics", false);
-            calMsg(T(`Imported from the file: ${res.added} new, ${res.updated} updated (next ${ICS_WINDOW_DAYS} days).`, `Импорт из файла: новых ${res.added}, обновлено ${res.updated} (на ${ICS_WINDOW_DAYS} дней вперёд).`));
-        };
-        r.readAsText(file);
+            calMsg(res.added || res.updated
+                ? T(`Imported from the file: ${res.added} new, ${res.updated} updated (next ${ICS_WINDOW_DAYS} days).`, `Импорт из файла: новых ${res.added}, обновлено ${res.updated} (на ${ICS_WINDOW_DAYS} дней вперёд).`)
+                : T(`All ${events.length} events from the file are already in LoadMind.`, `Все события из файла (${events.length}) уже есть в LoadMind.`));
+        } catch (e) {
+            calMsg(typeof DecompressionStream === "undefined"
+                ? T("This browser can't open .zip files. Unzip it and pick the .ics file inside.", "Этот браузер не открывает .zip. Распакуй архив и выбери .ics-файл из него.")
+                : T("Couldn't read the file. Unzip it and pick the .ics file inside.", "Не получилось прочитать файл. Распакуй архив и выбери .ics-файл из него."));
+        }
     }
 
     // direct connection through Google (needs GOOGLE_CLIENT_ID): reads events into LoadMind and sends LoadMind tasks back
@@ -341,12 +401,13 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
     function renderCal() {
         const box = $("lmCal"); if (!box) return;
         box.querySelector("h2").textContent = T("Google Calendar", "Google Календарь");
+        const fileWay = T("Or bring it in as a file: on a computer open Google Calendar → Settings → Import & export → Export, then pick the downloaded .zip (or an .ics file) here. Events for the next 14 days become fixed-time tasks, so the plan works around them.", "Или загрузи его файлом: на компьютере открой Google Календарь → Настройки → Импорт и экспорт → Экспорт и выбери здесь скачанный .zip (или .ics-файл). События на 14 дней вперёд станут задачами с фиксированным временем, и план построится вокруг них.");
         box.querySelector(".lm-cal-about").textContent = GOOGLE_CLIENT_ID
-            ? T("Events from your Google Calendar appear here as fixed-time tasks, so the plan works around them. Your LoadMind tasks with a time or deadline go to Google Calendar. Syncs again when you come back to the tab.", "События из Google Календаря появляются здесь как задачи с фиксированным временем — план строится вокруг них. Задачи LoadMind со временем или дедлайном уходят в Google Календарь. Синхронизация повторяется, когда возвращаешься на вкладку.")
-            : T("Bring your Google Calendar into LoadMind: in Google Calendar open Settings → Import & export → Export, unzip and pick the .ics file here. Events for the next 14 days become fixed-time tasks, so the plan works around them.", "Перенеси Google Календарь в LoadMind: в Google Календаре открой Настройки → Импорт и экспорт → Экспорт, распакуй архив и выбери .ics-файл здесь. События на 14 дней вперёд станут задачами с фиксированным временем, и план построится вокруг них.");
+            ? T("Events from your Google Calendar appear here as fixed-time tasks, so the plan works around them. Your LoadMind tasks with a time or deadline go to Google Calendar. Syncs again when you come back to the tab. ", "События из Google Календаря появляются здесь как задачи с фиксированным временем — план строится вокруг них. Задачи LoadMind со временем или дедлайном уходят в Google Календарь. Синхронизация повторяется, когда возвращаешься на вкладку. ") + fileWay
+            : fileWay.replace(/^(Or bring it in as a file|Или загрузи его файлом)/, m => T("Bring your Google Calendar into LoadMind", "Перенеси Google Календарь в LoadMind"));
         const g = $("calGoogle"); g.hidden = !GOOGLE_CLIENT_ID;
         g.textContent = state.gcalSync && token ? T("Sync now", "Синхронизировать") : T("Connect Google Calendar", "Подключить Google Календарь");
-        $("calFileBtn").textContent = T("Import .ics file", "Импорт .ics-файла");
+        $("calFileBtn").textContent = T("Import calendar file", "Загрузить файл календаря");
         const n = state.tasks.filter(t => (t.src === "gcal" || t.src === "ics") && !t.done).length;
         $("calRemove").hidden = !n;
         $("calRemove").textContent = T(`Remove imported (${n})`, `Убрать импортированные (${n})`);
@@ -375,7 +436,7 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
             save(); render();
         }
     });
-    document.addEventListener("change", e => { if (e.target.id === "calFile" && e.target.files[0]) { importIcsFile(e.target.files[0]); e.target.value = ""; } });
+    document.addEventListener("change", e => { if (e.target.id === "calFile" && e.target.files.length) { importIcsFiles([...e.target.files]); e.target.value = ""; } });
     // last visit, for the "welcome back" line
     let welcomeGap = 0;
     try {
