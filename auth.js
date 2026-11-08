@@ -36,10 +36,11 @@ const SUPABASE_KEY = "sb_publishable_SwG_2MiHBgK5jp00zQPuYw_FPgMq5T_";
 
     // sync: last change wins. Local edits are uploaded a moment after they happen.
     let timer = null, busy = false, status = "", mode = "in", leaving = false;
-    const DEMO = fresh().tasks.map(t => t.title).join("|");
+    // an untouched guest: no tasks (new start) or the four sample tasks older versions began with
+    const DEMOS = [fresh().tasks.map(t => t.title).join("|"), "SAT Math|IELTS Reading|Volleyball|Light review"];
     const newer = (a, b) => !b || new Date(a) > new Date(b);
     const cloudCopy = () => { const d = JSON.parse(JSON.stringify(state)); d.settings.key = ""; return d; };
-    const guestHasData = () => state.tasks.map(t => t.title).join("|") !== DEMO || !!state.notes || Object.keys(state.focus || {}).length > 0;
+    const guestHasData = () => !DEMOS.includes(state.tasks.map(t => t.title).join("|")) || !!state.notes || Object.keys(state.focus || {}).length > 0;
 
     function setStatus(s) { status = s; paint(); }
 
