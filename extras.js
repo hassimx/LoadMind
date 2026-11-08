@@ -366,7 +366,7 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         if (next) {
             const n = el("strong", "lm-next-title", next.title); d.append(n, el("p", "", `${next.time} · ${isRu() ? dur(next.minutes).replace(/ h/g, " ч").replace(/ min/g, " мин") : dur(next.minutes)}`));
             const go = el("button", "secondary-button", T("Start focus", "Начать фокус")); go.type = "button"; go.dataset.focus = next.id; d.append(go);
-        } else d.append(el("strong", "lm-next-title", T("All clear", "Всё сделано")), el("p", "", T("Add a task in My Tasks.", "Добавь задачу в «Задачи».")));
+        } else d.append(el("strong", "lm-next-title", T("All clear", "Всё сделано")), el("p", "", T("Add a task in the field at the top.", "Добавь задачу в поле наверху.")));
         box.append(a, b, c, d);
 
         // welcome back / weekly recap line
@@ -408,6 +408,7 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         const g = $("calGoogle"); g.hidden = !GOOGLE_CLIENT_ID;
         g.textContent = state.gcalSync && token ? T("Sync now", "Синхронизировать") : T("Connect Google Calendar", "Подключить Google Календарь");
         $("calFileBtn").textContent = T("Import calendar file", "Загрузить файл календаря");
+        $("icsButton").textContent = T("Export plan and deadlines (.ics)", "Выгрузить план и дедлайны (.ics)");
         const n = state.tasks.filter(t => (t.src === "gcal" || t.src === "ics") && !t.done).length;
         $("calRemove").hidden = !n;
         $("calRemove").textContent = T(`Remove imported (${n})`, `Убрать импортированные (${n})`);

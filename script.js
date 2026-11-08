@@ -24,12 +24,7 @@ function fillDays() {
 const fresh = () => ({
     settings: { name: "", start: "09:00", capacity: 8, peak: "morning", provider: "gemini", model: "", key: "", remind: false, pomoWork: 25, pomoShort: 5, pomoLong: 15, pomoEvery: 4 },
     focus: {},
-    tasks: [
-        { id: 1, title: "SAT Math", minutes: 50, type: "exam", done: false, due: soon(1, 18), prio: 2 },
-        { id: 2, title: "IELTS Reading", minutes: 45, type: "exam", done: false },
-        { id: 3, title: "Volleyball", minutes: 120, type: "physical", done: false },
-        { id: 4, title: "Light review", minutes: 25, type: "light", done: false }
-    ],
+    tasks: [], // a new user starts empty: the plan and the index are about their own day, not made-up tasks
     nextId: 5, notes: "", notesScore: 0, categories: []
 });
 
@@ -573,12 +568,38 @@ function render() {
     todayTasks().forEach(t => { byType[t.type] = (byType[t.type] || 0) + left(t); });
     $("breakdown").replaceChildren(...Object.entries(byType).map(([k, v]) => tag(`${TYPE_NAME[k]} · ${dur(v)}`)));
 
+    // what the number means, in plain words (the details explain how it's counted)
+    const ru = isRu(), cap = state.settings.capacity, dRu = m => (ru ? dur(m).replace(/ h/g, " ч").replace(/ min/g, " мин") : dur(m));
+    $("loadWhy").textContent = !todayTasks().length
+        ? (ru ? "На сегодня задач нет, день свободный. Добавь задачи, и здесь будет видно, насколько день загружен." : "Nothing planned for today, the day is free. Add tasks and this shows how full the day is.")
+        : (ru ? `${index} из 100. На сегодня задач на ${dRu(openMin)}. С учётом их сложности это ${workload}% от ${cap} ч, которые ты можешь осилить за день.` : `${index} out of 100. Today's tasks take ${dRu(openMin)}. Counting how hard they are, that's ${workload}% of the ${cap} h you can handle in a day.`)
+          + (state.notes ? (ru ? " Твои заметки тоже учитываются: усталость поднимает индекс." : " Your notes count too: tiredness raises the index.") : "");
+    $("loadHowSum").textContent = ru ? "Как считается индекс" : "How the index is counted";
+    $("loadHow").textContent = ru
+        ? `Каждая открытая задача на сегодня считается по оставшемуся времени. Подготовка к экзамену весит ×1,3, спорт ×1,2, учёба ×1, лёгкие дела ×0,4. Задача с дедлайном в ближайшие 24 часа весит на 20% больше. Сумма сравнивается с твоей дневной ёмкостью (сейчас ${cap} ч, меняется в настройках). До 25 — низкая нагрузка, 25–49 — нормальная, 50–74 — высокая, от 75 — критическая: тогда LoadMind предлагает разгрузить день. Если есть заметки о дне, они дают 40% индекса.`
+        : `Every open task for today counts with the time it still needs. Exam prep weighs ×1.3, sport ×1.2, study ×1, light tasks ×0.4, and a deadline within 24 hours adds 20%. The total is compared with your daily capacity (now ${cap} h, change it in Settings). Under 25 is low, 25–49 normal, 50–74 high, 75 and more critical: then LoadMind suggests unloading the day. If you wrote notes about the day, they make up 40% of the index.`;
+
+    // examples to tap while the list is empty, so the first step is obvious
+    const ex = $("lmExamples");
+    ex.hidden = state.tasks.length > 0;
+    if (!ex.hidden) {
+        const samples = ru ? ["Физика 1 ч завтра 18:00", "Подготовка к SAT 50 мин !!", "Тренировка 2 ч в 18:00", "Прочитать главу 30 мин"]
+            : ["Physics 1h tomorrow 18:00", "SAT prep 50 min !!", "Training 2h at 18:00", "Read a chapter 30 min"];
+        const lead = document.createElement("span"); lead.textContent = ru ? "Например:" : "For example:";
+        ex.replaceChildren(lead, ...samples.map(t => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.example = t; b.textContent = t; return b; }));
+    }
+
     // plan
     const plan = buildPlan();
     $("schedule").replaceChildren(...plan.map(p => {
         const row = document.createElement("div");
         row.className = "task" + (p.rest ? " break" : "") + (p.peak ? " peak" : "");
-        row.innerHTML = `<div class="time"></div><div class="task-info"><strong></strong><small></small></div>`;
+        row.innerHTML = `<span class="check"></span><div class="time"></div><div class="task-info"><strong></strong><small></small></div>`;
+        if (p.id) { // tick tasks off right in the plan
+            const c = document.createElement("input");
+            c.type = "checkbox"; c.dataset.id = p.id; c.title = "Mark as done"; c.setAttribute("aria-label", "Mark as done");
+            row.querySelector(".check").append(c);
+        }
         row.querySelector(".time").textContent = p.time;
         row.querySelector("strong").textContent = p.title;
         if (p.prio) row.querySelector("strong").prepend(prioBadge(p.prio));
@@ -586,11 +607,11 @@ function render() {
         if (p.id) row.append(focusButton(p.id));
         return row;
     }));
-    if (!plan.length) $("schedule").innerHTML = `<p class="empty">Nothing planned. Add tasks in My Tasks.</p>`;
+    if (!plan.length) $("schedule").innerHTML = `<p class="empty">Nothing planned yet. Type your first task in the field above.</p>`;
     $("warning").dataset.level = levelOf(index);
     $("warningTitle").textContent = `${LEVELS[levelOf(index)]} load`;
     $("warningText").textContent = generateAdvice(index);
-    document.querySelectorAll("[data-action=unload]").forEach(b => { b.hidden = workload < 75 && b.dataset.always !== "1"; });
+    document.querySelectorAll("[data-action=unload]").forEach(b => { b.hidden = !todayTasks().length || (workload < 75 && b.dataset.always !== "1"); });
 
     renderWeek();
 
@@ -635,13 +656,10 @@ function render() {
 }
 
 function showView(v) {
+    if (v === "schedule" || v === "workload") v = "dashboard"; // these two tabs are now part of Today
     view = v;
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === v));
     document.querySelectorAll("[data-views]").forEach(el => { el.hidden = !el.dataset.views.split(" ").includes(v); });
-    const grid = document.querySelector(".content-grid");
-    const visible = [...grid.children].filter(c => !c.hidden).length;
-    grid.hidden = visible === 0;
-    grid.style.gridTemplateColumns = visible === 1 ? "1fr" : "";
 }
 
 
@@ -686,12 +704,21 @@ $("quickForm").addEventListener("submit", async e => {
     $("quickHint").textContent = "Parsing…";
     const r = await smartParse(text);
     state.tasks.push({ id: state.nextId++, title: r.title, minutes: r.minutes, type: r.type, done: false, due: r.due, at: r.at || "", day: r.day || "", prio: r.prio || 0, repeat: r.repeat || "" });
-    $("quickHint").textContent = `${r.ai ? "AI" : "Rules"} · Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.at ? ` · at ${r.at.replace("T", " ")}` : "") + (r.due ? ` · due ${r.due.replace("T", " ")}` : "")
+    $("quickHint").textContent = `Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.at ? ` · at ${r.at.replace("T", " ")}` : "") + (r.due ? ` · due ${r.due.replace("T", " ")}` : "")
         + (r.day ? ` · on ${r.day}` : "") + (r.prio ? ` · ${PRIO_MARK[r.prio]}` : "") + (r.repeat ? ` · ↻ ${REPEAT_NAME[r.repeat]}` : "");
     $("quickText").value = "";
     save(); render();
 });
 $("icsButton").addEventListener("click", exportICS);
+$("lmExamples").addEventListener("click", e => {
+    const b = e.target.closest("[data-example]"); if (!b) return;
+    $("quickText").value = b.dataset.example; $("quickText").focus();
+});
+$("schedule").addEventListener("click", e => {
+    if (!e.target.matches("input[type=checkbox][data-id]")) return;
+    const task = state.tasks.find(t => t.id === Number(e.target.dataset.id));
+    if (task) { setDone(task, e.target.checked); save(); render(); }
+});
 $("coachButton").addEventListener("click", askCoach);
 $("setProvider").addEventListener("change", e => { state.settings.provider = e.target.value; $("setModel").placeholder = DEFAULT_MODEL.gemini; save(); });
 $("setModel").addEventListener("change", e => { state.settings.model = e.target.value.trim(); save(); });

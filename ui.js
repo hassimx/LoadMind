@@ -6,7 +6,11 @@
 
     /* language (EN / RU) */
     const RU = {
-        "Dashboard": "Обзор", "My Tasks": "Задачи", "Schedule": "План", "Workload": "Нагрузка", "Settings": "Настройки",
+        "Dashboard": "Обзор", "Today": "Сегодня", "Nothing open": "Задач нет",
+        "Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading...": "Например: сегодня два часа SAT Math и тренировка по волейболу, сил нет. Завтра нужно доделать IELTS Reading...",
+        "Looks at your day and suggests what to change.": "Посмотрит на твой день и подскажет, что поменять.", "Tasks": "Задачи", "My Tasks": "Задачи", "Mark as done": "Отметить как сделанное",
+        "What do you need to do? For example: «Physics 1h tomorrow 18:00»": "Что нужно сделать? Например: «Физика 1 ч завтра 18:00»",
+        "Nothing planned yet. Type your first task in the field above.": "Пока ничего не запланировано. Напиши первую задачу в поле наверху.", "Schedule": "План", "Workload": "Нагрузка", "Settings": "Настройки",
         "LoadMind Coach": "Коуч LoadMind", "Get insight": "Получить совет", "Developer settings": "Для разработчиков", "Network": "Сеть", "Study time": "Время на учёбу", "Daily balance": "Баланс дня",
         "Notes": "Заметки", "Read my notes": "Прочитать заметки", "Found in your notes": "Найдено в заметках", "Plan for today": "План на сегодня",
         "Export plan + deadlines (.ics for Google Calendar)": "Экспорт плана и дедлайнов (.ics для Google Календаря)",
@@ -57,7 +61,7 @@
     const LBL = { "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка", "Exam prep": "Экзамен" };
     const MO = { Jan: "янв", Feb: "фев", Mar: "мар", Apr: "апр", May: "мая", Jun: "июн", Jul: "июл", Aug: "авг", Sep: "сен", Oct: "окт", Nov: "ноя", Dec: "дек" }, WD = { Mon: "пн", Tue: "вт", Wed: "ср", Thu: "чт", Fri: "пт", Sat: "сб", Sun: "вс" }, LV = { Low: "Низкая", Normal: "Нормальная", High: "Высокая", Critical: "Критическая" };
     const num = t => t
-        .replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
+        .replace(/^Added: /, "Добавлено: ").replace(/ · (Exam prep|Study|Physical|Light)(?= · |$)/, (m, a) => " · " + ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a]).replace(/^Parsing…$/, "Разбираю…").replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
         .replace(/^Average (.+) a day$/, "В среднем $1 в день").replace(/^Focused on this task: (.+) of (.+)$/, "По задаче сделано: $1 из $2")
         .replace(/^Won't fit · short by /, "Не успеваешь · не хватает ").replace(/^Tight · (.+) spare$/, "Впритык · запас $1").replace(/^Cushion · (.+) spare$/, "Запас до дедлайна · $1")
         .replace(/^Capacity (.+) a day$/, "Ёмкость: $1 в день").replace(/^Overloaded days: /, "Перегруженных дней: ").replace(/^Deadlines at risk: /, "Дедлайнов под угрозой: ")
@@ -87,7 +91,7 @@
             });
         });
         const g = $("#greeting");
-        if (g && ru && /^[A-Za-z]+day \d/.test(g.textContent)) g.textContent = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+        if (g && ru && /^[A-Za-z]+day \d/.test(g.textContent)) { const d = new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); g.textContent = d[0].toUpperCase() + d.slice(1); }
         document.documentElement.lang = lang;
         document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
         quote();
@@ -131,7 +135,7 @@
         px = mx = e.clientX; py = my = e.clientY;
         dot.style.transform = `translate(${px}px,${py}px)`;
         const b = e.target.closest && e.target.closest(".primary-button,.secondary-button,.theme-toggle");
-        if (b) { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(px - r.left - r.width / 2) * .18}px,${(py - r.top - r.height / 2) * .28}px)`; }
+        if (b && look.cur === "custom") { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(px - r.left - r.width / 2) * .18}px,${(py - r.top - r.height / 2) * .28}px)`; }
     });
     document.addEventListener("pointerout", e => { const b = e.target.closest && e.target.closest(".primary-button,.secondary-button,.theme-toggle"); if (b) b.style.transform = ""; });
     document.addEventListener("pointerover", e => cur.classList.toggle("hot", !!(e.target.closest && e.target.closest("a,button,input,select,textarea,label"))));
@@ -140,7 +144,8 @@
 
     /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "network"; look.cur = look.cur || "custom";
+    // calm by default: no moving background and the normal cursor; both can be turned on in Settings
+    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();

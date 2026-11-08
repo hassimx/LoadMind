@@ -109,12 +109,10 @@
         <div class="wrap topbar-inner">
             <div class="logo">Load<em>Mind</em></div>
             <nav class="navigation" aria-label="Sections">
-                <button class="nav-item active" data-view="dashboard">Dashboard</button>
-                <button class="nav-item" data-view="tasks">My Tasks</button>
-                <button class="nav-item" data-view="schedule">Schedule</button>
+                <button class="nav-item active" data-view="dashboard">Today</button>
+                <button class="nav-item" data-view="tasks">Tasks</button>
                 <button class="nav-item" data-view="week">Week</button>
                 <button class="nav-item" data-view="focus">Focus</button>
-                <button class="nav-item" data-view="workload">Workload</button>
                 <button class="nav-item" data-view="settings">Settings</button>
             </nav>
             <div class="tools">
@@ -136,17 +134,25 @@
             <p class="subtitle" id="summary"></p>
         </header>
 
-        <section class="block lm-today-block" data-views="dashboard" data-notr>
-            <p class="lm-recap" id="lmRecap"></p>
-            <div class="lm-today" id="lmToday"></div>
+        <section class="block lm-add" data-views="dashboard tasks">
+            <form class="quick" id="quickForm">
+                <input id="quickText" type="text" autocomplete="off" aria-label="Smart input" placeholder="What do you need to do? For example: «Physics 1h tomorrow 18:00»">
+                <button class="primary-button" type="submit">Add</button>
+            </form>
+            <p class="hint" id="quickHint">Duration, day and time are picked up automatically. Add ! / !! / !!! for priority, «every day» or «по будням» to repeat.</p>
+            <div class="lm-examples" id="lmExamples" data-notr hidden></div>
         </section>
 
-        <section class="block lm-ask" id="lmAsk" data-notr hidden>
-            <p class="lm-ask-q" id="lmAskQ"></p>
-            <div class="lm-ask-row" id="lmAskRow"></div>
+        <section class="block lm-plan" data-views="dashboard">
+            <h2>Plan for today</h2>
+
+            <div class="schedule" id="schedule"></div>
+
+            <div class="row-actions"><button class="secondary-button" data-action="unload" data-always="1" type="button">Unload today</button></div>
+            <p class="hint unload-hint"></p>
         </section>
 
-        <section class="block" data-views="dashboard workload">
+        <section class="block" data-views="dashboard">
             <div class="overload-header">
                 <div>
                     <h2>Overload index</h2>
@@ -163,16 +169,22 @@
             </div>
 
             <div class="tags breakdown" id="breakdown"></div>
-                <div class="warning" id="warning">
-                    <div class="warning-title" id="warningTitle"></div>
-                    <p id="warningText"></p>
-                </div>
-
+            <div class="warning" id="warning">
+                <div class="warning-title" id="warningTitle"></div>
+                <p id="warningText"></p>
+            </div>
+            <p class="lm-why" id="loadWhy" data-notr></p>
+            <details class="lm-how" data-notr><summary id="loadHowSum"></summary><p id="loadHow"></p></details>
         </section>
 
-        <section class="quote" data-views="dashboard">
-            <small id="quoteMeta"></small>
-            <p id="quoteText"></p>
+        <section class="block lm-ask" id="lmAsk" data-notr hidden>
+            <p class="lm-ask-q" id="lmAskQ"></p>
+            <div class="lm-ask-row" id="lmAskRow"></div>
+        </section>
+
+        <section class="block lm-today-block" data-views="dashboard" data-notr>
+            <p class="lm-recap" id="lmRecap"></p>
+            <div class="lm-today" id="lmToday"></div>
         </section>
 
         <section class="block lm-tips" id="lmTips" data-views="dashboard" data-notr>
@@ -186,13 +198,32 @@
             <div class="coach-head">
                 <div>
                     <h2>LoadMind Coach</h2>
+                    <p class="hint">Looks at your day and suggests what to change.</p>
                 </div>
-                <button class="primary-button" id="coachButton" type="button">Get insight</button>
+                <button class="secondary-button" id="coachButton" type="button">Get insight</button>
             </div>
             <p class="coach-out" id="coachOut"></p>
         </section>
 
-        <section class="stats-grid" data-views="workload">
+        <section class="block" data-views="dashboard">
+            <h2>Notes</h2>
+
+            <textarea
+                id="notes"
+                aria-label="Notes about your day"
+                placeholder="Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading..."
+            ></textarea>
+
+            <button class="secondary-button" id="analyzeButton">Read my notes</button>
+
+            <div class="analysis-result" id="analysisResult">
+                <div class="result-title">Found in your notes</div>
+                <div class="tags" id="tags"></div>
+                <p id="advice"></p>
+            </div>
+        </section>
+
+        <section class="stats-grid" data-views="none">
             <div class="stat-card">
                 <div class="stat-header"><span>Workload</span><span class="stat-label" id="workloadLabel"></span></div>
                 <div class="stat-value"><strong id="workloadValue"></strong><span>%</span></div>
@@ -211,44 +242,8 @@
             </div>
         </section>
 
-        <section class="content-grid">
-
-            <div class="block" data-views="dashboard workload">
-                <h2>Notes</h2>
-
-                <textarea
-                    id="notes"
-                    aria-label="Notes about your day"
-                    placeholder="Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading..."
-                ></textarea>
-
-                <button class="primary-button" id="analyzeButton">Read my notes</button>
-
-                <div class="analysis-result" id="analysisResult">
-                    <div class="result-title">Found in your notes</div>
-                    <div class="tags" id="tags"></div>
-                    <p id="advice"></p>
-                </div>
-            </div>
-
-            <div class="block" data-views="dashboard schedule">
-                <h2>Plan for today</h2>
-
-                <div class="schedule" id="schedule"></div>
-
-                <div class="row-actions"><button class="secondary-button" data-action="unload" data-always="1" type="button">Unload today</button> <button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
-                <p class="hint unload-hint"></p>
-            </div>
-
-        </section>
-
         <section class="block" data-views="tasks">
             <h2>My tasks</h2>
-            <form class="quick" id="quickForm">
-                <input id="quickText" type="text" autocomplete="off" aria-label="Smart input" placeholder="Type a task: «SAT Math 1h tomorrow 18:00»">
-                <button class="primary-button" type="submit">Add</button>
-            </form>
-            <p class="hint" id="quickHint">Duration, day and time are picked up automatically. Add ! / !! / !!! for priority, «every day» or «по будням» to repeat.</p>
             <details class="manual">
                 <summary>Add manually</summary>
                 <form class="manual-form" id="taskForm">
@@ -341,19 +336,25 @@
             <p class="hint lm-apptime" id="appTimeNote" data-notr></p>
         </section>
 
-        <section class="block lm-cal" id="lmCal" data-views="schedule week settings" data-notr>
+        <section class="quote" data-views="focus">
+            <small id="quoteMeta"></small>
+            <p id="quoteText"></p>
+        </section>
+
+        <section class="block lm-cal" id="lmCal" data-views="settings" data-notr>
             <h2>Google Calendar</h2>
             <p class="hint lm-cal-about"></p>
             <div class="row-actions">
                 <button class="primary-button" id="calGoogle" type="button" hidden></button>
                 <button class="secondary-button" id="calFileBtn" type="button"></button>
                 <button class="secondary-button" id="calRemove" type="button" hidden></button>
+                <button class="secondary-button" data-notr id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button>
                 <input id="calFile" type="file" accept=".ics,.zip,text/calendar,application/zip" multiple hidden>
             </div>
             <p class="hint" id="calMsg" aria-live="polite"></p>
         </section>
 
-        <section class="block lm-badges-block" data-views="dashboard focus" data-notr>
+        <section class="block lm-badges-block" data-views="focus" data-notr>
             <h2 id="lmBadgesHead">Achievements</h2>
             <div class="lm-badges" id="lmBadges"></div>
         </section>

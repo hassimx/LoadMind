@@ -887,3 +887,49 @@ body.auth-open { overflow: hidden; }
 .lm-foot { display: flex; gap: 18px; flex-wrap: wrap; padding: 28px 0 40px; border-top: 1px solid var(--rule); margin-top: 24px; font: 400 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
 .lm-foot a { color: inherit; }
 .lm-foot a:hover { color: var(--ink); }
+
+/* calm layer: an everyday tool, not a demo. Normal-case text, a smaller date, nothing that jumps on hover. */
+body::before { display: none; }
+.main { padding-top: 28px; }
+.header { padding-top: 0; margin-bottom: 20px; }
+.header h1 { font: 600 clamp(24px, 3.2vw, 34px) / 1.15 var(--display); letter-spacing: -.02em; margin-bottom: 6px; }
+.nav-item, .nav-item.active { font: 500 14px var(--sans); text-transform: none; letter-spacing: 0; }
+.primary-button, .secondary-button { font: 500 14px var(--sans); text-transform: none; letter-spacing: 0; padding: 11px 20px; }
+.subtitle, .lm-recap, .lm-card small, .lm-tip-cat, .quote small, .manual summary, .adv summary, .field, .chip,
+.account-btn, .lm-foot, .day-name small, .focus-week span, .focus-week small, .pomo-phase, .pomo-center small,
+.task-name em.cushion, .lang { font-family: var(--sans); text-transform: none; letter-spacing: 0; font-size: 13px; }
+.stat-card:hover, .lm-card:hover, .task-row:hover { transform: none; }
+
+/* Today: the input comes first, then the plan you can tick off */
+.lm-add { padding-top: 0; }
+.lm-add .hint { margin-bottom: 0; }
+.lm-examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.lm-examples span { color: var(--ink-3); font-size: 13px; margin-right: 2px; }
+.lm-examples .chip { color: var(--ink-2); }
+.lm-examples .chip:hover { border-color: var(--accent); color: var(--ink); }
+.lm-plan .task { grid-template-columns: 22px 50px 1fr auto; align-items: start; }
+.lm-plan .check input { margin: 3px 0 0; width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.lm-plan .task.peak { padding-left: 10px; }
+
+/* overload index in plain words */
+.lm-why { color: var(--ink-2); margin: 14px 0 0; line-height: 1.55; }
+.lm-how { margin-top: 10px; }
+.lm-how summary { cursor: pointer; color: var(--ink-3); font-size: 13px; }
+.lm-how summary:hover { color: var(--ink); }
+.lm-how p { color: var(--ink-2); font-size: 14px; line-height: 1.6; margin: 8px 0 0; max-width: 70ch; }
+
+/* progress cards: two per row on phones instead of four tall ones */
+@media (max-width: 480px) {
+    .lm-today { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .lm-card { padding: 12px; }
+    .lm-card strong { font-size: 24px; }
+    .lm-next { grid-column: 1 / -1; }
+}
+
+/* "Next up" repeated the first line of the plan right above it */
+.lm-next { display: none !important; }
+.lm-today { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 480px) { .lm-today { grid-template-columns: repeat(2, 1fr); } .lm-today > :nth-child(3) { grid-column: 1 / -1; } }
+.coach .hint { margin: 4px 0 0; }
+/* five tabs fit on a phone */
+@media (max-width: 480px) { .navigation { gap: 16px; } .nav-item, .nav-item.active { font-size: 13px; } }
