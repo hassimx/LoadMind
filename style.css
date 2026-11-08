@@ -871,7 +871,6 @@ body.auth-open { overflow: hidden; }
 .lm-ask-q { margin: 0; font-size: 18px; line-height: 1.4; }
 .lm-ask-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .lm-ask-row .link-btn { margin-left: 4px; }
-.lm-ask .hint { margin: 0; }
 .lm-apptime { margin: 16px 0 0; }
 .lm-profile-note { margin: 10px 0 4px; }
 .lm-src { font-style: normal; color: var(--ink-3); font-size: 12px; }

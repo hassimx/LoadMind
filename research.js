@@ -92,8 +92,6 @@
             $("lmAskQ").textContent = T("About how much time a day do you spend on social media?", "Сколько примерно времени в день у тебя уходит на соцсети?");
             $("lmAskRow").replaceChildren(...SOCIAL.map(v => chip(socialName(v), "social:" + v)), skip);
         }
-        $("lmAskWhy").textContent = T("It helps compare workload and focus between grades. Only totals across all users are looked at. You can change it in Settings.",
-            "Так можно сравнить нагрузку и фокус у разных классов. Смотрятся только общие цифры по всем пользователям. Поменять можно в настройках.");
     }
 
     document.addEventListener("click", e => {
