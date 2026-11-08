@@ -8,7 +8,7 @@
     const RU = {
         "Dashboard": "Обзор", "Today": "Сегодня", "Nothing open": "Задач нет",
         "Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading...": "Например: сегодня два часа SAT Math и тренировка по волейболу, сил нет. Завтра нужно доделать IELTS Reading...",
-        "Looks at your day and suggests what to change.": "Посмотрит на твой день и подскажет, что поменять.", "Tasks": "Задачи", "My Tasks": "Задачи", "Mark as done": "Отметить как сделанное",
+        "Looks at your day and suggests what to change.": "Посмотрит на твой день и подскажет, что поменять.", "Tasks": "Задачи", "My Tasks": "Задачи", "Mark as done": "Отметить как сделанное", "Tap to edit": "Нажми, чтобы изменить", "Mark as not done": "Вернуть в план",
         "What do you need to do? For example: «Physics 1h tomorrow 18:00»": "Что нужно сделать? Например: «Физика 1 ч завтра 18:00»",
         "Nothing planned yet. Type your first task in the field above.": "Пока ничего не запланировано. Напиши первую задачу в поле наверху.", "Schedule": "План", "Workload": "Нагрузка", "Settings": "Настройки",
         "LoadMind Coach": "Коуч LoadMind", "Get insight": "Получить совет", "Developer settings": "Для разработчиков", "Network": "Сеть", "Study time": "Время на учёбу", "Daily balance": "Баланс дня",

@@ -8,9 +8,11 @@ Live demo: https://loadmind.dev (also at https://loadmind.hassimx.workers.dev, m
 
 ## What it does
 
-You add a task in one line, in English or Russian. "SAT 4 hours 13:00-17:00" becomes a task with a start time, and "by Friday 18:00" becomes a deadline. From your open tasks LoadMind makes a plan for the day. Hard tasks are placed at the hours when you focus best, and long sessions are followed by a break. The schedule itself is built by plain rules.
+Everything for the day is on one screen, Today: a field to add a task, the plan, and the overload index. You add a task in one line, in English or Russian. "SAT 4 hours 13:00-17:00" becomes a task with a start time, and "by Friday 18:00" becomes a deadline. From your open tasks LoadMind makes a plan for the day. Hard tasks are placed at the hours when you focus best, and long sessions are followed by a break. The schedule itself is built by plain rules.
 
-It also shows an Overload Index from 0 to 100. The number depends on how much work is still open, how many hours you can realistically handle in a day, and a short note you can write about how the day went. When you are happy with the plan, you can export it to Google Calendar, either as an .ics file or as a link for each task.
+You can tick tasks off right in the plan: done ones stay there, crossed out, with a count of what you've done today. Tap a task to change its name, length, type, time, deadline, priority or repeat.
+
+It also shows an Overload Index from 0 to 100. The number depends on how much work is still open, how many hours you can realistically handle in a day, and a short note you can write about how the day went. Under the number LoadMind says in plain words what it means (for example "today's tasks take 4 h 5 min, that's 58% of the 8 h you can handle in a day"), and how it's counted. When you are happy with the plan, you can export it to Google Calendar, either as an .ics file or as a link for each task.
 
 ### Focus timer
 
@@ -22,10 +24,14 @@ Events from Google Calendar come into LoadMind as tasks with a fixed time, so th
 
 ### Coming back every day
 
-- The dashboard shows a daily streak (days with a finished task or a focus session), a daily goal of 3 tasks, your level and XP, and the next task in the plan with a button to start focusing on it.
+- Today shows a daily streak (days with a finished task or a focus session), a daily goal of 3 tasks and your level and XP.
 - Achievements for the first task, streaks of 3, 7 and 30 days, focus hours and more, with a small celebration when you unlock one.
 - A weekly recap compares this week with the last one, and a welcome-back line appears after a break.
 - A study lifehack of the day (memory, focus, sleep, exams, planning), plus a tip that reacts to your day: an overloaded day, a deadline within 24 hours, or a late hour.
+
+### On a phone
+
+On a phone the menu sits at the bottom of the screen, and LoadMind can be added to the home screen (Share → Add to Home Screen on iPhone, ⋮ → Add to Home screen on Android). It then opens like an app, with its own icon and without the browser bar.
 
 ### Accounts
 
@@ -60,7 +66,7 @@ supabase/research.sql compares the groups: minutes in the app and in focus per d
 
 ## How it works
 
-It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. research.js counts the time in the app, logs the daily overload index and asks for the grade. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
+It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. today.js is editing a task, the list of what is done today and the first line for new users. research.js counts the time in the app, logs the daily overload index and asks for the grade. manifest.webmanifest and icons/ let it be added to a phone home screen. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
 
 Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the AI keys off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini. Gemini is reached through OpenRouter, and Google's free tier is the backup when OpenRouter is not set or fails.
 
