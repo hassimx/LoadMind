@@ -18,7 +18,7 @@ The Focus tab has a Pomodoro timer: 25 minutes of work, a 5 minute break, and a 
 
 ### Google Calendar
 
-Events from Google Calendar come into LoadMind as tasks with a fixed time, so the plan for the day is built around your lessons and trainings. You can import the .ics file that Google Calendar exports (Settings → Import & export). With a Google OAuth client ID in extras.js, LoadMind connects to Google Calendar directly and syncs both ways: events come in, and LoadMind tasks with a time or a deadline go out. It syncs again when you come back to the tab.
+Events from Google Calendar come into LoadMind as tasks with a fixed time, so the plan for the day is built around your lessons and trainings. You can import the file that Google Calendar exports (Settings → Import & export): the .zip itself, no need to unzip it, or a single .ics. Repeating lessons, deleted and moved days and events in other time zones come in correctly. With a Google OAuth client ID in extras.js, LoadMind connects to Google Calendar directly and syncs both ways: events come in, and LoadMind tasks with a time or a deadline go out. It syncs again when you come back to the tab.
 
 ### Coming back every day
 
@@ -48,9 +48,19 @@ The AI coach works for signed-in users. Each account has a daily limit of AI req
   <img src="screenshots/russian.png" width="32%" alt="Russian interface">
 </p>
 
+### Research: workload by grade
+
+I want to find out how loaded students of different grades are, for example whether 11th graders are in the red zone more often than 9th graders, and whether more time on social media goes with less focus. So LoadMind:
+
+- counts the minutes you spend in the app (only while the page is open and you use it; after 5 minutes without a click, key or scroll it stops counting, unless the focus timer is running). The Focus tab shows it next to your focus time;
+- saves the overload index of each day (the highest and the average while the app was open);
+- asks once, on the dashboard, which grade you are in and roughly how much time a day you spend on social media. Both can be skipped and changed in Settings.
+
+supabase/research.sql compares the groups: minutes in the app and in focus per day, the average overload, the share of red days and the link between social media and focus. It shows only totals, leaves out groups of fewer than 3 people and users with less than 3 days in the app.
+
 ## How it works
 
-It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
+It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. research.js counts the time in the app, logs the daily overload index and asks for the grade. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
 
 Accounts and data are on Supabase. supabase/schema.sql creates one table with each user's data and a table that counts AI requests. Row level security lets every user read and change only their own row. The AI requests go through a Cloudflare Worker (worker.js), which keeps the AI keys off the page, checks that the user is signed in and counts the request against the daily limit before calling Gemini. Gemini is reached through OpenRouter, and Google's free tier is the backup when OpenRouter is not set or fails.
 

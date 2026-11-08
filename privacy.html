@@ -22,13 +22,16 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
 <main>
 <p><a href="/">← LoadMind</a></p>
 <h1>Privacy Policy</h1>
-<p class="meta">Last updated: 1 November 2026</p>
+<p class="meta">Last updated: 8 November 2026</p>
 
 <p>LoadMind (loadmind.dev) is a study planner for students. This page explains what data LoadMind uses, why, and what control you have over it.</p>
 
 <h2>Data you put into LoadMind</h2>
 <p>Your tasks, notes, settings, focus timer history, streak and achievements. As a guest, all of it stays in your browser only. If you create an account, it is saved in our database (Supabase) so it syncs between your devices. Each account can read and change only its own data.</p>
 
+<h2>Statistics for research</h2>
+<p>LoadMind is also a small study of how loaded students are. For that it keeps, together with your other data: how many minutes a day you spend in LoadMind (counted only while the page is open and you are using it), the overload index of each day, and, only if you choose to answer, your grade and roughly how much time a day you spend on social media. Both questions can be skipped, and changed or cleared at any time in Settings.</p>
+<p>The study looks only at totals across all users, for example the average focus time of 10th graders. It never looks at one person's data, and groups of fewer than 3 people are left out. Nothing of this is sent to any other service or shown to anyone.</p>
 <h2>Account data</h2>
 <p>If you sign up, we store your email address and a securely hashed password (handled by Supabase Auth). We use your email only to sign you in and to send password reset emails you ask for.</p>
 
@@ -63,6 +66,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
 <p>LoadMind хранит твои задачи, заметки и настройки в браузере, а если ты создала аккаунт, то и в базе данных (Supabase), чтобы они синхронизировались между устройствами. Каждый аккаунт видит только свои данные.</p>
 <p>Если ты подключаешь Google Календарь, LoadMind читает события основного календаря на 14 дней вперёд и показывает их как задачи с фиксированным временем, а задачи LoadMind со временем или дедлайном добавляет в Google Календарь. Токен доступа хранится только в текущей сессии браузера и не уходит на наш сервер. Мы не продаём данные Google, не используем их для рекламы и для обучения ИИ. Отозвать доступ можно на myaccount.google.com/permissions.</p>
 <p>Когда ты нажимаешь кнопку с ИИ, нужный для ответа текст отправляется в Google Gemini, только чтобы получить этот ответ. Рекламы и трекеров нет. Чтобы удалить аккаунт и данные, напиши на почту выше.</p>
+<p>Для исследования нагрузки школьников LoadMind считает, сколько минут в день ты проводишь в приложении (только пока страница открыта и ты ею пользуешься), сохраняет индекс перегрузки за каждый день, а также класс и примерное время в соцсетях, если ты сама захочешь ответить (это можно пропустить или поменять в настройках). Смотрятся только общие цифры по всем пользователям, данные одного человека никто не смотрит, а группы меньше 3 человек не учитываются.</p>
 </div>
 </main>
 </body>

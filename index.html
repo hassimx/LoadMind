@@ -141,6 +141,12 @@
             <div class="lm-today" id="lmToday"></div>
         </section>
 
+        <section class="block lm-ask" id="lmAsk" data-notr hidden>
+            <p class="lm-ask-q" id="lmAskQ"></p>
+            <div class="lm-ask-row" id="lmAskRow"></div>
+            <p class="hint" id="lmAskWhy"></p>
+        </section>
+
         <section class="block" data-views="dashboard workload">
             <div class="overload-header">
                 <div>
@@ -333,6 +339,7 @@
         <section class="block" data-views="focus">
             <h2>Focus by day</h2>
             <div class="focus-week" id="focusWeek"></div>
+            <p class="hint lm-apptime" id="appTimeNote" data-notr></p>
         </section>
 
         <section class="block lm-cal" id="lmCal" data-views="schedule week settings" data-notr>
@@ -342,7 +349,7 @@
                 <button class="primary-button" id="calGoogle" type="button" hidden></button>
                 <button class="secondary-button" id="calFileBtn" type="button"></button>
                 <button class="secondary-button" id="calRemove" type="button" hidden></button>
-                <input id="calFile" type="file" accept=".ics,text/calendar" hidden>
+                <input id="calFile" type="file" accept=".ics,.zip,text/calendar,application/zip" multiple hidden>
             </div>
             <p class="hint" id="calMsg" aria-live="polite"></p>
         </section>
@@ -359,6 +366,9 @@
             <label class="setting">Peak focus time
                 <select id="setPeak"><option value="none">Not set</option><option value="morning">Morning (08:00)</option><option value="day">Afternoon (13:00)</option><option value="evening">Evening (18:00)</option></select>
             </label>
+            <label class="setting" data-notr><span id="setGradeLabel">Grade</span> <select id="setGrade"></select></label>
+            <label class="setting" data-notr><span id="setSocialLabel">Social media a day</span> <select id="setSocial"></select></label>
+            <p class="hint lm-profile-note" id="profileNote" data-notr></p>
             <details class="adv" id="advanced"><summary>Developer settings</summary>
             <label class="setting">AI provider
                 <select id="setProvider"><option value="gemini">Google Gemini (free key)</option></select>
@@ -433,6 +443,7 @@
     <script src="auth.js"></script>
     <script src="pomodoro.js"></script>
     <script src="extras.js"></script>
+    <script src="research.js"></script>
     <script src="ui.js"></script>
 
 </body>
