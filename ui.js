@@ -135,7 +135,7 @@
         px = mx = e.clientX; py = my = e.clientY;
         dot.style.transform = `translate(${px}px,${py}px)`;
         const b = e.target.closest && e.target.closest(".primary-button,.secondary-button,.theme-toggle");
-        if (b && look.cur === "custom") { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(px - r.left - r.width / 2) * .18}px,${(py - r.top - r.height / 2) * .28}px)`; }
+        if (b) { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(px - r.left - r.width / 2) * .18}px,${(py - r.top - r.height / 2) * .28}px)`; }
     });
     document.addEventListener("pointerout", e => { const b = e.target.closest && e.target.closest(".primary-button,.secondary-button,.theme-toggle"); if (b) b.style.transform = ""; });
     document.addEventListener("pointerover", e => cur.classList.toggle("hot", !!(e.target.closest && e.target.closest("a,button,input,select,textarea,label"))));
@@ -144,8 +144,7 @@
 
     /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    // calm by default: no moving background and the normal cursor; both can be turned on in Settings
-    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
+    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "network"; look.cur = look.cur || "custom";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();

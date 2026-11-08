@@ -888,8 +888,7 @@ body.auth-open { overflow: hidden; }
 .lm-foot a { color: inherit; }
 .lm-foot a:hover { color: var(--ink); }
 
-/* calm layer: an everyday tool, not a demo. Normal-case text, a smaller date, nothing that jumps on hover. */
-body::before { display: none; }
+/* calm layer: normal-case text, a smaller date, cards that don't jump on hover */
 .main { padding-top: 28px; }
 .header { padding-top: 0; margin-bottom: 20px; }
 .header h1 { font: 600 clamp(24px, 3.2vw, 34px) / 1.15 var(--display); letter-spacing: -.02em; margin-bottom: 6px; }
