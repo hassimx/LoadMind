@@ -20,11 +20,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20261112b">
-    <link rel="stylesheet" href="design.css?v=20261113a">
+    <link rel="stylesheet" href="design.css?v=20261113b">
 
     <script>
     /* one address for everyone: the old workers.dev address moves to loadmind.dev, so sign-ins and data stay in one place */
     if (location.hostname === "loadmind.hassimx.workers.dev" || location.hostname === "loadmind.dev." || location.hostname === "www.loadmind.dev") location.replace("https://loadmind.dev" + location.pathname + location.search + location.hash);
+    </script>
+
+    <script>
+    /* background style before the first paint (the rest of it lives in ui.js) */
+    try { document.documentElement.dataset.bg = (JSON.parse(localStorage.getItem("loadmind.look")) || {}).bg || "off"; } catch (e) {}
     </script>
 
     <script>
@@ -415,7 +420,7 @@
             </div>
             <label class="setting">Long break after (sessions) <input id="setPomoEvery" type="number" min="1" max="12"></label>
             <label class="setting">Background
-                <select id="setBg"><option value="off">Off</option><option value="network">Network</option><option value="lines">Lines</option></select>
+                <select id="setBg"><option value="off">Off</option><option value="grid">Notebook grid</option><option value="berries">Pixel berries</option><option value="glow">Soft glow</option><option value="network">Network</option><option value="lines">Lines</option></select>
             </label>
             <label class="setting">Cursor
                 <select id="setCur"><option value="standard">Standard</option><option value="custom">Custom</option></select>
@@ -571,7 +576,7 @@
     <script src="research.js?v=20261112e"></script>
     <script src="stats.js?v=20261112a"></script>
     <script src="feedback.js?v=20261112m"></script>
-    <script src="ui.js?v=20261113a"></script>
+    <script src="ui.js?v=20261113b"></script>
     <script src="mascot.js?v=20261112k"></script>
     <script src="berry.js?v=20261112k"></script>
     <script src="design.js?v=20261112l"></script>

@@ -29,7 +29,7 @@
         "Light day": "Лёгкий день", "Balanced": "Сбалансировано", "High, but manageable": "Много, но терпимо", "Too much for one day": "Слишком много для одного дня",
         "Good": "Хорошо", "OK": "Нормально", "Recovery time available": "Есть время на отдых", "Add recovery time": "Добавь время на отдых",
         "academic": "учёба", "exam": "экзамен", "physical": "спорт", "fatigue": "усталость", "recovery": "отдых",
-        "Background": "Фон", "Sparkles": "Звёздочки", "Plus signs": "Плюсики", "Lines": "Линии", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
+        "Background": "Фон", "Notebook grid": "Клетка", "Pixel berries": "Ягодки", "Soft glow": "Свечение", "Sparkles": "Звёздочки", "Plus signs": "Плюсики", "Lines": "Линии", "Off": "Выкл.", "Cursor": "Курсор", "Custom": "Свой", "Standard": "Обычный",
         "Language": "Язык", "AI provider": "ИИ-провайдер", "Everything is stored in this browser only": "Всё хранится только в этом браузере",
         "Add": "Добавить", "Add manually": "Добавить вручную", "Duration": "Длительность", "Deadline": "Дедлайн", "Start at (optional)": "Начало (необязательно)", "Task": "Задача", "Type": "Тип", "h": "ч", "min": "мин", "Not set": "Не задано", "e.g. SAT Reading": "например, SAT Reading",
         "Type a task: «SAT Math 1h tomorrow 18:00»": "Напиши задачу: «SAT Math 1ч завтра 18:00»", "Duration, day and time are picked up automatically.": "Длительность, день и время подхватываются сами.",
@@ -146,13 +146,15 @@
 
     /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
+    look.bg = ["grid", "berries", "glow", "network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
+    const applyBg = () => { root.dataset.bg = look.bg; }; // grid, berries and glow are plain CSS on the canvas (design.css), the other two are drawn below
+    applyBg();
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();
     const sb = $("#setBg"), sc = $("#setCur");
     sb.value = look.bg; sc.value = look.cur;
-    sb.onchange = () => { look.bg = sb.value; saveLook(); };
+    sb.onchange = () => { look.bg = sb.value; saveLook(); applyBg(); };
     sc.onchange = () => { look.cur = sc.value; saveLook(); applyCur(); };
 
     const cv = $("#dots"), cx = cv.getContext("2d");

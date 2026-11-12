@@ -606,3 +606,29 @@ body { overflow-x: clip; }
 .lm-plan.lm-flash { animation: lmFlash 1.4s ease-out; }
 @keyframes lmFlash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
 @media (prefers-reduced-motion: reduce) { .lm-plan.lm-flash { animation: none; } }
+
+/* ---------- calm backgrounds (Settings -> Background); drawn with CSS on the fixed #dots layer, so they cost nothing ---------- */
+/* notebook grid: squares like a school exercise book, tinted with the accent and fading out down the page */
+:root[data-bg="grid"] #dots {
+    --g: color-mix(in srgb, var(--accent) 11%, transparent);
+    background-image: linear-gradient(to right, var(--g) 1px, transparent 1px), linear-gradient(to bottom, var(--g) 1px, transparent 1px);
+    background-size: 24px 24px; background-position: -1px -1px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0, 0, 0, .35) 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 45%, rgba(0, 0, 0, .35) 100%);
+}
+:root[data-theme="dark"][data-bg="grid"] #dots { --g: color-mix(in srgb, var(--accent) 16%, transparent); }
+/* pixel berries: Berry's little cousins, sparkles and seeds, in the accent colour (two tiles of different size, so no obvious repeat) */
+:root[data-bg="berries"] #dots {
+    background: var(--accent); opacity: .11;
+    -webkit-mask-image: url("icons/bg-berries-a.svg"), url("icons/bg-berries-b.svg"); mask-image: url("icons/bg-berries-a.svg"), url("icons/bg-berries-b.svg");
+    -webkit-mask-size: 210px 210px, 290px 290px; mask-size: 210px 210px, 290px 290px;
+    -webkit-mask-position: 0 0, 97px 61px; mask-position: 0 0, 97px 61px;
+}
+:root[data-theme="dark"][data-bg="berries"] #dots { opacity: .16; }
+/* soft glow: three blurred lights in Berry's colours (body, cheeks, leaf) */
+:root[data-bg="glow"] #dots {
+    background:
+        radial-gradient(ellipse 70vmax 50vmax at -10% -10%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 70%),
+        radial-gradient(ellipse 55vmax 45vmax at 110% 25%, color-mix(in srgb, #ff97bb 20%, transparent), transparent 70%),
+        radial-gradient(ellipse 65vmax 45vmax at 40% 115%, color-mix(in srgb, #3cc26e 13%, transparent), transparent 70%);
+}
+:root[data-theme="dark"][data-bg="glow"] #dots { opacity: .8; }
