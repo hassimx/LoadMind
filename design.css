@@ -488,3 +488,33 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 .navigation { max-width: 100%; }
 @media (max-width: 1240px) { .cal-btn, .fb-btn { width: 36px; padding: 0; justify-content: center; } .cal-btn span, .fb-btn span { display: none; } }
 @media (max-width: 480px) { .cal-howto { padding-left: 20px; } }
+
+/* ---------- Loady you can play with (mascot.js) ---------- */
+.loady-main, .loady-buddy { position: relative; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.loady-main:focus-visible, .loady-buddy:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+.loady-main .loady-svg, .loady-buddy .loady-svg { transform-origin: 50% 90%; }
+.loady.poke .loady-svg { animation: lPoke .55s cubic-bezier(.3, 1.6, .5, 1); }
+.loady.chew .loady-svg { animation: lChew .22s steps(2) 4; }
+.loady.spin .loady-svg { animation: lSpin .9s cubic-bezier(.3, 1.2, .5, 1); }
+@keyframes lPoke { 0% { transform: none; } 25% { transform: scale(1.14, .84); } 55% { transform: scale(.93, 1.1) translateY(-6%); } 100% { transform: none; } }
+@keyframes lChew { 50% { transform: scale(1.04, .93); } }
+@keyframes lSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.l-heart { position: absolute; top: 4%; width: 13px; height: 12px; pointer-events: none; z-index: 2; opacity: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath fill='%23ff5f8f' d='M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z'/%3E%3Cpath fill='%23fff' d='M1 1h1v1H1z'/%3E%3C/svg%3E") center / contain no-repeat;
+    animation: lHeart 1.2s ease-out forwards; }
+@keyframes lHeart { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 15% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-46px) scale(1.1); } }
+
+/* the one in the corner of the other sections */
+.loady-buddy { position: fixed; right: 22px; bottom: 22px; z-index: 60; width: 74px; display: block; animation: lPeek .6s cubic-bezier(.3, 1.4, .5, 1); }
+.loady-buddy .loady-svg { width: 74px; filter: drop-shadow(0 8px 10px rgba(20, 20, 30, .18)); }
+.loady-buddy .loady-say { position: absolute; right: 84px; bottom: 26px; margin: 0; width: max-content; max-width: 240px; opacity: 0; transform: translateY(6px) scale(.96); transform-origin: right bottom;
+    transition: opacity .25s, transform .3s cubic-bezier(.3, 1.4, .5, 1); pointer-events: none; }
+.loady-buddy .loady-say::before { left: auto; right: -7px; box-shadow: 2px 2px 0 0 var(--ink); }
+.loady-buddy.talk .loady-say { opacity: 1; transform: none; }
+@keyframes lPeek { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 640px) {
+    .loady-buddy { right: 10px; bottom: calc(76px + env(safe-area-inset-bottom)); width: 58px; }
+    .loady-buddy .loady-svg { width: 58px; }
+    .loady-buddy .loady-say { right: 66px; bottom: 18px; max-width: 210px; font-size: 13.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .loady.poke .loady-svg, .loady.chew .loady-svg, .loady.spin .loady-svg, .loady-buddy, .l-heart { animation: none !important; } }
