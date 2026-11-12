@@ -536,7 +536,7 @@ function render() {
     $("greeting").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
     const open = state.tasks.filter(t => !t.done);
     const openMin = todayTasks().reduce((sum, t) => sum + left(t), 0);
-    const summary = open.length ? `${open.length} open · ${dur(openMin)} planned` : "Nothing open";
+    const summary = !open.length ? "No tasks yet" : `${open.length} open · ${openMin ? dur(openMin) + " today" : "nothing for today"}`;
     $("summary").textContent = state.settings.name ? `${state.settings.name} · ${summary}` : summary;
 
     // stats
@@ -579,13 +579,14 @@ function render() {
         ? `Каждая открытая задача на сегодня считается по оставшемуся времени. Подготовка к экзамену весит ×1,3, спорт ×1,2, учёба ×1, лёгкие дела ×0,4. Задача с дедлайном в ближайшие 24 часа весит на 20% больше. Сумма сравнивается с твоей дневной ёмкостью (сейчас ${cap} ч, меняется в настройках). До 25 — низкая нагрузка, 25–49 — нормальная, 50–74 — высокая, от 75 — критическая: тогда LoadMind предлагает разгрузить день. Если есть заметки о дне, они дают 40% индекса.`
         : `Every open task for today counts with the time it still needs. Exam prep weighs ×1.3, sport ×1.2, study ×1, light tasks ×0.4, and a deadline within 24 hours adds 20%. The total is compared with your daily capacity (now ${cap} h, change it in Settings). Under 25 is low, 25–49 normal, 50–74 high, 75 and more critical: then LoadMind suggests unloading the day. If you wrote notes about the day, they make up 40% of the index.`;
 
-    // examples to tap while the list is empty, so the first step is obvious
+    // examples to tap while the list is empty, so the first step is obvious.
+    // They are all for today and have no clock time, so a tap puts them straight into today's plan at any hour.
     const ex = $("lmExamples");
     ex.hidden = state.tasks.length > 0;
     if (!ex.hidden) {
-        const samples = ru ? ["Физика 1 ч завтра 18:00", "Подготовка к SAT 50 мин !!", "Тренировка 2 ч в 18:00", "Прочитать главу 30 мин"]
-            : ["Physics 1h tomorrow 18:00", "SAT prep 50 min !!", "Training 2h at 18:00", "Read a chapter 30 min"];
-        const lead = document.createElement("span"); lead.textContent = ru ? "Например:" : "For example:";
+        const samples = ru ? ["Домашка по физике 1 ч !!", "Подготовка к SAT 50 мин", "Тренировка 1 ч", "Прочитать главу 30 мин"]
+            : ["Physics homework 1h !!", "SAT prep 50 min", "Training 1h", "Read a chapter 30 min"];
+        const lead = document.createElement("span"); lead.textContent = ru ? "Нажми, чтобы попробовать:" : "Tap one to try:";
         ex.replaceChildren(lead, ...samples.map(t => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.example = t; b.textContent = t; return b; }));
     }
 
@@ -607,7 +608,9 @@ function render() {
         if (p.id) row.append(focusButton(p.id));
         return row;
     }));
-    if (!plan.length) $("schedule").innerHTML = `<p class="empty">Nothing planned yet. Type your first task in the field above.</p>`;
+    if (!plan.length) $("schedule").innerHTML = state.tasks.some(t => !t.done && !isToday(t))
+        ? `<p class="empty">Nothing for today. Tasks for other days are in the Week tab.</p>`
+        : `<p class="empty">Nothing planned yet. Type your first task in the field above.</p>`;
     $("warning").dataset.level = levelOf(index);
     $("warningTitle").textContent = `${LEVELS[levelOf(index)]} load`;
     $("warningText").textContent = generateAdvice(index);
@@ -703,16 +706,31 @@ $("quickForm").addEventListener("submit", async e => {
     if (!text) return;
     $("quickHint").textContent = "Parsing…";
     const r = await smartParse(text);
-    state.tasks.push({ id: state.nextId++, title: r.title, minutes: r.minutes, type: r.type, done: false, due: r.due, at: r.at || "", day: r.day || "", prio: r.prio || 0, repeat: r.repeat || "" });
-    $("quickHint").textContent = `Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.at ? ` · at ${r.at.replace("T", " ")}` : "") + (r.due ? ` · due ${r.due.replace("T", " ")}` : "")
-        + (r.day ? ` · on ${r.day}` : "") + (r.prio ? ` · ${PRIO_MARK[r.prio]}` : "") + (r.repeat ? ` · ↻ ${REPEAT_NAME[r.repeat]}` : "");
+    const first = !state.tasks.length;
+    const task = { id: state.nextId++, title: r.title, minutes: r.minutes, type: r.type, done: false, due: r.due, at: r.at || "", day: r.day || "", prio: r.prio || 0, repeat: r.repeat || "" };
+    state.tasks.push(task);
+    const when = s => new Date(s).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const hint = `Added: «${r.title}» · ${dur(r.minutes)} · ${TYPE_NAME[r.type]}` + (r.at ? ` · at ${when(r.at)}` : "") + (r.due ? ` · due ${when(r.due)}` : "")
+        + (!r.at && r.day ? ` · on ${new Date(r.day + "T00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : "") + (r.prio ? ` · ${PRIO_MARK[r.prio]}` : "") + (r.repeat ? ` · ↻ ${REPEAT_NAME[r.repeat]}` : "");
     $("quickText").value = "";
-    save(); render();
+    save();
+    // show what the task did to the day: the overload index for today, or where a later task went (set before render, so it gets translated)
+    $("quickHint").textContent = hint + (isToday(task) ? ` · today's load: ${metrics().index}/100` : " · see the Week tab");
+    render();
+    if (first) { // the very first task: bring the plan into view so the result is seen, not just the input
+        const plan = document.querySelector(".lm-plan");
+        if (plan && !plan.hidden) {
+            plan.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+            plan.classList.remove("lm-flash"); void plan.offsetWidth; plan.classList.add("lm-flash");
+        }
+    }
 });
 $("icsButton").addEventListener("click", exportICS);
 $("lmExamples").addEventListener("click", e => {
     const b = e.target.closest("[data-example]"); if (!b) return;
-    $("quickText").value = b.dataset.example; $("quickText").focus();
+    $("quickText").value = b.dataset.example;
+    const f = $("quickForm"); // one tap adds it, no extra "Add" press
+    if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event("submit", { cancelable: true }));
 });
 $("schedule").addEventListener("click", e => {
     if (!e.target.matches("input[type=checkbox][data-id]")) return;

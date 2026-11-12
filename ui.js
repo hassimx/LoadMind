@@ -6,7 +6,8 @@
 
     /* language (EN / RU) */
     const RU = {
-        "Dashboard": "Обзор", "Today": "Сегодня", "Nothing open": "Задач нет",
+        "Dashboard": "Обзор", "Today": "Сегодня", "Nothing open": "Задач нет", "No tasks yet": "Задач пока нет",
+        "Nothing for today. Tasks for other days are in the Week tab.": "На сегодня ничего. Задачи на другие дни — во вкладке «Неделя».",
         "Example: Today I studied SAT Math for two hours and had a volleyball training. I am really tired. Tomorrow I need to finish IELTS Reading...": "Например: сегодня два часа SAT Math и тренировка по волейболу, сил нет. Завтра нужно доделать IELTS Reading...",
         "Looks at your day and suggests what to change.": "Посмотрит на твой день и подскажет, что поменять.", "Tasks": "Задачи", "My Tasks": "Задачи", "Mark as done": "Отметить как сделанное", "Tap to edit": "Нажми, чтобы изменить", "Mark as not done": "Вернуть в план",
         "What do you need to do? For example: «Physics 1h tomorrow 18:00»": "Что нужно сделать? Например: «Физика 1 ч завтра 18:00»",
@@ -61,7 +62,8 @@
     const LBL = { "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка", "Exam prep": "Экзамен" };
     const MO = { Jan: "янв", Feb: "фев", Mar: "мар", Apr: "апр", May: "мая", Jun: "июн", Jul: "июл", Aug: "авг", Sep: "сен", Oct: "окт", Nov: "ноя", Dec: "дек" }, WD = { Mon: "пн", Tue: "вт", Wed: "ср", Thu: "чт", Fri: "пт", Sat: "сб", Sun: "вс" }, LV = { Low: "Низкая", Normal: "Нормальная", High: "Высокая", Critical: "Критическая" };
     const num = t => t
-        .replace(/^Added: /, "Добавлено: ").replace(/ · (Exam prep|Study|Physical|Light)(?= · |$)/, (m, a) => " · " + ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a]).replace(/^Parsing…$/, "Разбираю…").replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
+        .replace(/^Added: /, "Добавлено: ").replace(/ · today's load: (\d+)\/100$/, " · нагрузка на сегодня: $1/100").replace(/ · see the Week tab$/, " · смотри вкладку «Неделя»")
+        .replace(/ · nothing for today$/, " · на сегодня ничего").replace(/ today$/, " на сегодня").replace(/ · (Exam prep|Study|Physical|Light)(?= · |$)/, (m, a) => " · " + ({ "Exam prep": "Экзамен", Study: "Учёба", Physical: "Спорт", Light: "Лёгкое" })[a]).replace(/^Parsing…$/, "Разбираю…").replace(/^Moved: /, "Перенесено: ").replace(/^Round (\d+) of (\d+)$/, "Раунд $1 из $2").replace(/^(\d+) sessions?$/, "Сессий: $1").replace(/^Best: (\d+) days?$/, "Рекорд: $1 дн.")
         .replace(/^Average (.+) a day$/, "В среднем $1 в день").replace(/^Focused on this task: (.+) of (.+)$/, "По задаче сделано: $1 из $2")
         .replace(/^Won't fit · short by /, "Не успеваешь · не хватает ").replace(/^Tight · (.+) spare$/, "Впритык · запас $1").replace(/^Cushion · (.+) spare$/, "Запас до дедлайна · $1")
         .replace(/^Capacity (.+) a day$/, "Ёмкость: $1 в день").replace(/^Overloaded days: /, "Перегруженных дней: ").replace(/^Deadlines at risk: /, "Дедлайнов под угрозой: ")

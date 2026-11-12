@@ -585,3 +585,24 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
     body.berry-open { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) { .loady-main .loady-svg, .loady-card .loady-svg, .berry-chat, .bc-msg, .l-mA, .l-mB, .l-dots rect { animation: none !important; } }
+
+/* phones: the top bar always fits the screen, so the page never slides sideways */
+@media (max-width: 640px) {
+    .topbar-inner { grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; }
+    .logo { font-size: 23px; white-space: nowrap; }
+    .tools { gap: 6px; min-width: 0; max-width: 100%; justify-self: end; }
+    .tools > * { flex: none; }
+    .fb-btn, .theme-toggle { width: 32px; height: 32px; }
+    .tools > .account-btn { flex: 0 1 auto; min-width: 0; height: 32px; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lang { gap: 3px; font-size: 12.5px; }
+}
+@media (max-width: 359px) {
+    .topbar-inner { padding-left: 14px; padding-right: 14px; }
+    .theme-toggle { display: none; }
+}
+body { overflow-x: clip; }
+
+/* the first task lands in the plan: a short glow shows where it went */
+.lm-plan.lm-flash { animation: lmFlash 1.4s ease-out; }
+@keyframes lmFlash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
+@media (prefers-reduced-motion: reduce) { .lm-plan.lm-flash { animation: none; } }
