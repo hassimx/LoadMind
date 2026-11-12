@@ -289,13 +289,17 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 /* ---------- Loady, the pixel character (mascot.js) ---------- */
 .loady { display: inline-flex; align-items: center; }
 .loady-svg { display: block; width: 100%; height: auto; overflow: visible; }
-.loady .lo { fill: #141414; }
+.loady .lo { fill: color-mix(in srgb, var(--accent) 38%, #050a2e); }   /* outline: a dark shade of the body, not black */
 .loady .lb { fill: var(--accent); }
-.loady .lh { fill: color-mix(in srgb, var(--accent) 40%, #fff); }
-.loady .lc { fill: #ff8fb4; }
+.loady .lh { fill: color-mix(in srgb, var(--accent) 52%, #fff); }
+.loady .ld2 { fill: color-mix(in srgb, var(--accent) 74%, #000); }
+.loady .lc { fill: #ff97bb; }
+.loady .lk { fill: #0d1240; }
 .loady .lw { fill: #fff; }
-.loady .ld { fill: #6cc4ff; }
-.loady .ls { fill: var(--ink-3); }
+.loady .ltg { fill: #ff6b8a; }
+.loady .ls { fill: #7cc8ff; }
+.loady .lst { fill: #b4b0a6; }
+.loady .ly { fill: #ffc531; }
 .loady .lg { fill: #3cc26e; }
 .loady .lt { fill: #1f8a4c; }
 .l-body { animation: lBob 1.8s steps(1) infinite; }
@@ -305,6 +309,8 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 .l-sweat2 { animation-delay: -.5s; }
 .l-steam { animation: lSteam 1s steps(3) infinite; }
 .l-zzz { animation: lZzz 2.4s steps(4) infinite; }
+.l-stars { animation: lStars .8s steps(2) infinite; }
+@keyframes lStars { 50% { opacity: .35; } }
 .loady[data-mood="busy"] .l-body { animation-duration: .9s; }
 .loady[data-mood="over"] .l-body { animation: lShake .28s steps(1) infinite; }
 .loady[data-mood="sleep"] .l-body { animation-duration: 3.2s; }
@@ -319,7 +325,7 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 @keyframes lJump { 0%, 100% { transform: none; } 30% { transform: translateY(-14%); } 60% { transform: translateY(-6%); } }
 
 .logo { display: flex; align-items: center; }
-.loady-logo { width: 30px; flex: none; margin-right: 9px; }
+.loady-logo { width: 36px; flex: none; margin-right: 8px; }
 .loady-logo .l-body { animation: none; }
 
 /* in the overload card: title on top, the character with its line, the number on the right */
@@ -327,18 +333,18 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 .overload-header > div:first-child { grid-area: t; }
 .overload-header > .score { grid-area: s; align-self: end; }
 .loady-main { grid-area: l; gap: 16px; }
-.loady-main .loady-svg { width: 104px; flex: none; }
+.loady-main .loady-svg { width: 116px; flex: none; }
 .loady-say { position: relative; margin: 0 0 0 6px; padding: 10px 14px; max-width: 300px; background: var(--paper-raised); color: var(--ink);
     font: 500 14.5px / 1.35 var(--sans);
-    box-shadow: 0 -3px 0 0 var(--ink), 0 3px 0 0 var(--ink), -3px 0 0 0 var(--ink), 3px 0 0 0 var(--ink); }
-.loady-say::before { content: ""; position: absolute; left: -9px; top: 50%; width: 6px; height: 6px; margin-top: -3px; background: var(--ink); box-shadow: -3px 3px 0 0 var(--ink); }
+    box-shadow: 0 -2px 0 0 var(--ink), 0 2px 0 0 var(--ink), -2px 0 0 0 var(--ink), 2px 0 0 0 var(--ink); }
+.loady-say::before { content: ""; position: absolute; left: -7px; top: 50%; width: 4px; height: 4px; margin-top: -2px; background: var(--ink); box-shadow: -2px 2px 0 0 var(--ink); }
 .loady-main[data-mood="over"] .loady-say, .loady-main[data-mood="busy"] .loady-say { background: var(--accent-soft); }
 @media (max-width: 640px) {
     .overload-header { grid-template-areas: "t s" "l l"; }
-    .loady-main .loady-svg { width: 78px; }
+    .loady-main .loady-svg { width: 88px; }
     .loady-say { font-size: 14px; max-width: none; }
 }
-.loady-empty { display: block; width: 88px; margin: 4px 0 12px; }
+.loady-empty { display: block; width: 100px; margin: 4px 0 12px; }
 .empty { display: flex; flex-direction: column; align-items: flex-start; }
 
 /* ---------- pixel numbers ---------- */
@@ -443,26 +449,39 @@ textarea { border-radius: var(--r-row); padding: 14px 16px; }
 }
 .task-row .cal-link { white-space: nowrap; }
 
-/* ---------- type: one pixel face (Tiny5) for headings and numbers, Onest for reading ---------- */
-:root { --display: "Tiny5", var(--sans); --pixel: "Tiny5", var(--mono); }
-.logo { font: 400 23px / 1 var(--display); letter-spacing: 0; }
-.logo em { font-style: normal; font-weight: 400; color: var(--accent); }
-.header h1 { font: 400 clamp(38px, 6vw, 66px) / 1.02 var(--display); letter-spacing: 0; }
-.block h2, .coach h2 { font: 400 26px / 1.15 var(--display); letter-spacing: 0; }
-@media (max-width: 640px) { .block h2, .coach h2 { font-size: 23px; } .logo { font-size: 21px; } }
-.auth-box h2 { font: 400 27px / 1.15 var(--display); letter-spacing: 0; }
-.overload-header .score, #score { font: 400 clamp(78px, 10vw, 120px) / .9 var(--pixel); letter-spacing: 0; }
-.stat-value { font: 400 44px / 1 var(--pixel); letter-spacing: 0; }
-.lm-card strong { font: 400 38px / 1 var(--pixel); letter-spacing: 0; }
-.lm-ring span { font: 400 16px var(--pixel); letter-spacing: 0; }
-.pomo-center strong { font: 400 clamp(56px, 7vw, 78px) / 1 var(--pixel); letter-spacing: 0; margin: 4px 0; }
-@media (max-width: 480px) { .lm-card strong { font-size: 30px; } }
+/* ---------- type: a fine pixel face for headings and numbers, Onest for reading ----------
+   LoadMind Pixel is Handjet (OFL, see fonts/OFL-Handjet.txt) cut down to Latin and Cyrillic, with a plain zero:
+   the original 0 has dots inside, here it uses the same shape without them. */
+@font-face { font-family: "LoadMind Pixel"; src: url("fonts/LoadMindPixel.woff") format("woff"); font-weight: 400 700; font-display: swap; }
+:root { --display: "LoadMind Pixel", var(--sans); --pixel: "LoadMind Pixel", var(--mono); }
+.logo { font: 600 29px / 1 var(--display); letter-spacing: 0; }
+.logo em { font-style: normal; font-weight: 600; color: var(--accent); }
+.header h1 { font: 500 clamp(48px, 7.4vw, 82px) / .98 var(--display); letter-spacing: 0; }
+.subtitle { margin-top: 2px; }
+.block h2, .coach h2 { font: 500 33px / 1.05 var(--display); letter-spacing: 0; }
+@media (max-width: 640px) { .block h2, .coach h2 { font-size: 30px; } .logo { font-size: 27px; } }
+.auth-box h2 { font: 500 34px / 1.05 var(--display); letter-spacing: 0; }
+.overload-header .score, #score { font: 600 clamp(100px, 12vw, 148px) / .8 var(--pixel); letter-spacing: 0; }
+.stat-value { font: 500 58px / .9 var(--pixel); letter-spacing: 0; }
+.stat-value span { font-size: 16px; }
+.lm-card strong { font: 500 52px / .9 var(--pixel); letter-spacing: 0; }
+.lm-ring span { font: 600 20px var(--pixel); letter-spacing: 0; }
+.pomo-center strong { font: 500 clamp(76px, 9vw, 104px) / .9 var(--pixel); letter-spacing: 0; margin: 2px 0; }
+@media (max-width: 480px) { .lm-card strong { font-size: 42px; } }
 .lm-tip-text { font: 500 19px / 1.45 var(--sans); letter-spacing: 0; }
-.lm-ask-q { font: 400 23px / 1.25 var(--display); }
-.quote p { font: 400 clamp(24px, 3vw, 34px) / 1.25 var(--display); letter-spacing: 0; max-width: 30ch; }
+.lm-ask-q { font: 500 29px / 1.1 var(--display); }
+.quote p { font: 400 clamp(30px, 3.8vw, 44px) / 1.1 var(--display); letter-spacing: 0; max-width: 30ch; }
 .day-name span { font: 600 15.5px var(--sans); }
-.lm-foot span { font: 400 17px var(--display); color: var(--ink-2); }
-.cal-num { font: 400 17px var(--display); }
+.lm-foot span { font: 600 21px var(--display); color: var(--ink-2); }
+.cal-num { font: 600 21px var(--display); }
+.time { font: 500 13px var(--mono); }
+
+/* finer pixel bars */
+.large-progress { height: 12px; background: repeating-linear-gradient(to right, var(--soft) 0 7px, transparent 7px 9px); }
+.large-progress-fill { -webkit-mask: repeating-linear-gradient(to right, #000 0 7px, transparent 7px 9px); mask: repeating-linear-gradient(to right, #000 0 7px, transparent 7px 9px); transition: width .9s steps(30, end); }
+.day-bar, .lm-bar { background: repeating-linear-gradient(to right, var(--soft) 0 5px, transparent 5px 7px); }
+.day-bar i, .lm-bar i { -webkit-mask: repeating-linear-gradient(to right, #000 0 5px, transparent 5px 7px); mask: repeating-linear-gradient(to right, #000 0 5px, transparent 5px 7px); }
+.focus-week i { -webkit-mask: repeating-linear-gradient(to top, #000 0 4px, transparent 4px 5px); mask: repeating-linear-gradient(to top, #000 0 4px, transparent 4px 5px); }
 
 /* top bar: a bit wider than the page so the labelled buttons fit; the menu never runs under the logo */
 .topbar .wrap { max-width: 1240px; }

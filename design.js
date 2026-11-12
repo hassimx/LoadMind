@@ -108,7 +108,7 @@
     let anim = 0;
     function dissolve() {
         if (still) return;
-        const W = innerWidth, H = innerHeight, S = W < 640 ? 26 : 34;
+        const W = innerWidth, H = innerHeight, S = W < 640 ? 14 : 18;
         cv.width = W; cv.height = H;
         const cols = Math.ceil(W / S), rows = Math.ceil(H / S), n = cols * rows;
         const order = Array.from({ length: n }, (_, i) => i);
