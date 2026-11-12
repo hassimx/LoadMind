@@ -146,7 +146,7 @@
 
     /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = ["grid", "berries", "glow", "network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
+    look.bg = ["grid", "berries", "glow", "network", "lines", "off"].includes(look.bg) ? look.bg : "grid"; // the notebook grid unless another style was picked look.cur = look.cur || "standard";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyBg = () => { root.dataset.bg = look.bg; }; // grid, berries and glow are plain CSS on the canvas (design.css), the other two are drawn below
     applyBg();
