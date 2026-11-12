@@ -55,7 +55,7 @@
         "focus": "фокус", "break": "перерыв", "long break": "длинный", "Long break after (sessions)": "Длинный перерыв после (сессий)",
         "Focus length": "Длина фокуса", "Short break length": "Длина перерыва", "Long break length": "Длина длинного перерыва",
         "Focus on this task": "Фокус на этой задаче", "Move to the next day": "Перенести на день вперёд", "Delete": "Удалить", "Delete task": "Удалить задачу",
-        "Add to Google Calendar": "Добавить в Google Календарь", "Sections": "Разделы",
+        "Add to Google Calendar": "Добавить в Google Календарь", "+ Calendar": "+ Календарь", "Sections": "Разделы",
         "Duration, day and time are picked up automatically. Add ! / !! / !!! for priority, «every day» or «по будням» to repeat.": "Длительность, день и время подхватываются сами. Добавь ! / !! / !!! для приоритета, «каждый день» или «по будням» для повтора."
     };
     const LBL = { "High concentration": "Высокая концентрация", "Medium load": "Средняя нагрузка", "Physical load": "Физическая нагрузка", "Light load": "Лёгкая нагрузка", "Exam prep": "Экзамен" };

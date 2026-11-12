@@ -17,9 +17,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Press+Start+2P&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Tiny5&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20261112b">
-    <link rel="stylesheet" href="design.css?v=20261112d">
+    <link rel="stylesheet" href="design.css?v=20261112e">
 
     <script>
     /* one address for everyone: the old workers.dev address moves to loadmind.dev, so sign-ins and data stay in one place */
@@ -124,6 +124,7 @@
             </nav>
             <div class="tools">
                 <button class="pomo-pill" id="pomoPill" type="button" title="Focus timer" hidden></button>
+                <button class="fb-btn cal-btn" id="calBtn" type="button" data-notr aria-label="Google Calendar" title="Google Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="calBtnText">Calendar</span><i class="cal-dot" hidden></i></button>
                 <button class="fb-btn" id="fbBtn" type="button" data-notr aria-label="Feedback" title="Feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 20.5l1.6-5A8.4 8.4 0 1 1 21 11.5z"/></svg><span id="fbBtnText">Feedback</span></button>
                 <button class="account-btn" id="accountBtn" type="button" data-notr hidden>Sign in</button>
                 <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" class="on">EN</button><span>/</span><button type="button" data-lang="ru">RU</button></div>
@@ -153,7 +154,10 @@
         </section>
 
         <section class="block lm-plan" data-views="dashboard">
-            <h2>Plan for today</h2>
+            <div class="plan-head">
+                <h2>Plan for today</h2>
+                <button class="cal-pill" id="calPill" type="button" data-notr><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span id="calPillText">Google Calendar</span></button>
+            </div>
 
             <div class="schedule" id="schedule"></div>
             <div class="lm-done" id="doneToday" hidden></div>
@@ -351,17 +355,11 @@
             <p id="quoteText"></p>
         </section>
 
-        <section class="block lm-cal" id="lmCal" data-views="settings" data-notr>
-            <h2>Google Calendar</h2>
-            <p class="hint lm-cal-about"></p>
-            <div class="row-actions">
-                <button class="primary-button" id="calGoogle" type="button" hidden></button>
-                <button class="secondary-button" id="calFileBtn" type="button"></button>
-                <button class="secondary-button" id="calRemove" type="button" hidden></button>
-                <button class="secondary-button" data-notr id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button>
-                <input id="calFile" type="file" accept=".ics,.zip,text/calendar,application/zip" multiple hidden>
+        <section class="block lm-cal-link" data-views="settings" data-notr>
+            <div class="cal-link-row">
+                <div><h2 id="calSetHead">Google Calendar</h2><p class="hint" id="calSetText"></p></div>
+                <button class="secondary-button" id="calOpenSettings" type="button">Open</button>
             </div>
-            <p class="hint" id="calMsg" aria-live="polite"></p>
         </section>
 
         <section class="block lm-badges-block" data-views="focus" data-notr>
@@ -475,6 +473,42 @@
         </div>
     </div>
 
+    <div class="auth-veil" id="calVeil" data-notr hidden>
+        <div class="auth-box cal-box" id="lmCal" role="dialog" aria-modal="true" aria-labelledby="calHead">
+            <button class="icon-btn auth-close" id="calClose" type="button" aria-label="Close">×</button>
+            <h2 id="calHead">Google Calendar</h2>
+            <p class="cal-status" id="calStatus"></p>
+
+            <div class="cal-step" id="calStepSync">
+                <span class="cal-num">1</span>
+                <div>
+                    <h3 id="calSyncH"></h3>
+                    <p class="hint" id="calSyncP"></p>
+                    <div class="row-actions"><button class="primary-button" id="calGoogle" type="button"></button></div>
+                </div>
+            </div>
+
+            <div class="cal-step">
+                <span class="cal-num">2</span>
+                <div>
+                    <h3 id="calOutH"></h3>
+                    <p class="hint" id="calOutP"></p>
+                    <div class="row-actions"><button class="secondary-button" id="icsButton" type="button">Export plan + deadlines (.ics for Google Calendar)</button></div>
+                </div>
+            </div>
+
+            <details class="cal-step cal-file">
+                <summary><span class="cal-num">?</span><span id="calFileH"></span></summary>
+                <ol class="cal-howto" id="calFileSteps"></ol>
+                <div class="row-actions"><button class="secondary-button" id="calFileBtn" type="button"></button></div>
+                <input id="calFile" type="file" accept=".ics,.zip,text/calendar,application/zip" multiple hidden>
+            </details>
+
+            <p class="cal-msg" id="calMsg" aria-live="polite"></p>
+            <button class="link-btn" id="calRemove" type="button" hidden></button>
+        </div>
+    </div>
+
     <div class="auth-veil" id="fbVeil" data-notr hidden>
         <form class="auth-box fb-box" id="fbForm" role="dialog" aria-modal="true" aria-labelledby="fbHead" novalidate>
             <button class="icon-btn auth-close" id="fbClose" type="button" aria-label="Close">×</button>
@@ -489,16 +523,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js?v=20261112b"></script>
-    <script src="auth.js?v=20261112b"></script>
-    <script src="pomodoro.js?v=20261112b"></script>
-    <script src="extras.js?v=20261112b"></script>
-    <script src="today.js?v=20261112b"></script>
-    <script src="research.js?v=20261112b"></script>
-    <script src="feedback.js?v=20261112b"></script>
-    <script src="ui.js?v=20261112b"></script>
-    <script src="mascot.js?v=20261112d"></script>
-    <script src="design.js?v=20261112d"></script>
+    <script src="script.js?v=20261112e"></script>
+    <script src="auth.js?v=20261112e"></script>
+    <script src="pomodoro.js?v=20261112e"></script>
+    <script src="extras.js?v=20261112e"></script>
+    <script src="today.js?v=20261112e"></script>
+    <script src="research.js?v=20261112e"></script>
+    <script src="feedback.js?v=20261112e"></script>
+    <script src="ui.js?v=20261112e"></script>
+    <script src="mascot.js?v=20261112e"></script>
+    <script src="design.js?v=20261112e"></script>
 
 </body>
 </html>

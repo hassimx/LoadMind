@@ -313,13 +313,14 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
                 : T("Google Calendar error: ", "Ошибка Google Календаря: ") + e.message);
         }
         syncing = false;
+        renderCal();
     }
     // coming back to the tab re-syncs if already connected (no popup)
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && token && state.gcalSync) syncGoogle(false); });
     setInterval(() => { if (token && state.gcalSync && document.visibilityState === "visible") syncGoogle(false); }, 10 * 6e4);
 
     let lastMsg = "";
-    function calMsg(m) { lastMsg = m; const p = $("calMsg"); if (p) p.textContent = m; }
+    function calMsg(m) { lastMsg = m; renderCal(); }
 
     // ---------- toast + confetti ----------
     function toast(text) {
@@ -399,27 +400,91 @@ const GOOGLE_CLIENT_ID = "419464428310-6sjn06369vm13960h1k15ksdn8j0o8m5.apps.goo
         const c = box.querySelector(".lm-tip-ctx"); c.textContent = ctx; c.hidden = !ctx;
     }
     function renderCal() {
-        const box = $("lmCal"); if (!box) return;
-        box.querySelector("h2").textContent = T("Google Calendar", "Google Календарь");
-        const fileWay = T("Or bring it in as a file: on a computer open Google Calendar → Settings → Import & export → Export, then pick the downloaded .zip (or an .ics file) here. Events for the next 14 days become fixed-time tasks, so the plan works around them.", "Или загрузи его файлом: на компьютере открой Google Календарь → Настройки → Импорт и экспорт → Экспорт и выбери здесь скачанный .zip (или .ics-файл). События на 14 дней вперёд станут задачами с фиксированным временем, и план построится вокруг них.");
-        box.querySelector(".lm-cal-about").textContent = GOOGLE_CLIENT_ID
-            ? T("Events from your Google Calendar appear here as fixed-time tasks, so the plan works around them. Your LoadMind tasks with a time or deadline go to Google Calendar. Syncs again when you come back to the tab. ", "События из Google Календаря появляются здесь как задачи с фиксированным временем — план строится вокруг них. Задачи LoadMind со временем или дедлайном уходят в Google Календарь. Синхронизация повторяется, когда возвращаешься на вкладку. ") + fileWay
-            : fileWay.replace(/^(Or bring it in as a file|Или загрузи его файлом)/, m => T("Bring your Google Calendar into LoadMind", "Перенеси Google Календарь в LoadMind"));
-        const g = $("calGoogle"); g.hidden = !GOOGLE_CLIENT_ID;
-        g.textContent = state.gcalSync && token ? T("Sync now", "Синхронизировать") : T("Connect Google Calendar", "Подключить Google Календарь");
-        $("calFileBtn").textContent = T("Import calendar file", "Загрузить файл календаря");
-        $("icsButton").textContent = T("Export plan and deadlines (.ics)", "Выгрузить план и дедлайны (.ics)");
+        if (!$("lmCal")) return;
         const n = state.tasks.filter(t => (t.src === "gcal" || t.src === "ics") && !t.done).length;
+        const connected = !!state.gcalSync, live = connected && !!token;
+        const when = iso => new Date(iso).toLocaleString(isRu() ? "ru-RU" : "en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+        // where it can be opened from: the top bar, the plan on Today, Settings
+        const short = syncing ? T("Syncing…", "Синхронизация…")
+            : live ? T("Calendar synced", "Календарь синхронизирован")
+            : connected ? T("Update calendar", "Обновить календарь")
+            : state.gcalImported ? T("Calendar from file", "Календарь из файла")
+            : T("Connect Google Calendar", "Подключить Google Календарь");
+        $("calPillText").textContent = short;
+        $("calPill").classList.toggle("on", connected || !!state.gcalImported);
+        $("calPill").title = T("Google Calendar", "Google Календарь");
+        $("calBtnText").textContent = T("Calendar", "Календарь");
+        $("calBtn").title = T("Google Calendar", "Google Календарь");
+        $("calBtn").setAttribute("aria-label", T("Google Calendar", "Google Календарь"));
+        $("calBtn").querySelector(".cal-dot").hidden = !connected;
+
+        const status = live ? T(`Connected. Last sync: ${when(state.gcalSync)}. It syncs again by itself every 10 minutes while LoadMind is open.`, `Подключён. Последняя синхронизация: ${when(state.gcalSync)}. Пока LoadMind открыт, он сам обновляется каждые 10 минут.`)
+            : connected ? T(`Was connected before (last sync: ${when(state.gcalSync)}). Press «Sync» to update.`, `Уже подключали (последняя синхронизация: ${when(state.gcalSync)}). Нажми «Синхронизировать», чтобы обновить.`)
+            : state.gcalImported ? T(`Loaded from a file: ${when(state.gcalImported)}. Events for the next 14 days are in your plan.`, `Загружен из файла: ${when(state.gcalImported)}. События на 14 дней вперёд уже в плане.`)
+            : T("Not connected yet.", "Пока не подключён.");
+        $("calStatus").textContent = status;
+        $("calStatus").classList.toggle("on", connected || !!state.gcalImported);
+        $("calSetText").textContent = status;
+        $("calSetHead").textContent = T("Google Calendar", "Google Календарь");
+        $("calOpenSettings").textContent = T("Open calendar settings", "Открыть календарь");
+
+        $("calHead").textContent = T("Google Calendar", "Google Календарь");
+        $("calClose").setAttribute("aria-label", T("Close", "Закрыть"));
+        $("calStepSync").hidden = !GOOGLE_CLIENT_ID;
+        $("calSyncH").textContent = connected ? T("Sync both ways", "Синхронизация в обе стороны") : T("Connect once, then it works by itself", "Подключи один раз, дальше всё само");
+        $("calSyncP").textContent = T("LoadMind takes your events for the next 14 days (classes, training, meetings) and puts them into the plan at their time, so everything else is planned around them. Your LoadMind tasks with a time or a deadline go to Google Calendar.",
+            "LoadMind берёт события на 14 дней вперёд (уроки, секции, встречи) и ставит их в план на их время, а остальное планирует вокруг. Твои задачи со временем или дедлайном уходят в Google Календарь.");
+        $("calGoogle").textContent = syncing ? T("Syncing…", "Синхронизация…") : connected ? T("Sync now", "Синхронизировать") : T("Connect Google Calendar", "Подключить Google Календарь");
+        $("calGoogle").disabled = syncing;
+
+        $("calOutH").textContent = T("Send the plan to a calendar without connecting", "Отправить план в календарь без подключения");
+        $("calOutP").textContent = T("Download an .ics file with today's plan and your deadlines. On a phone the calendar app opens it; in Google Calendar on a computer use Settings → Import & export → Import. One task at a time: «+ Calendar» next to it in Tasks.",
+            "Скачай файл .ics с планом на сегодня и дедлайнами. На телефоне его откроет приложение календаря, в Google Календаре на компьютере: Настройки → Импорт и экспорт → Импорт. Одну задачу можно отправить кнопкой «+ Календарь» рядом с ней в разделе «Задачи».");
+        $("icsButton").textContent = T("Download plan and deadlines (.ics)", "Скачать план и дедлайны (.ics)");
+
+        $("calFileH").textContent = T("Can't connect to Google? Load the calendar as a file", "Не получается подключить Google? Загрузи календарь файлом");
+        const steps = isRu()
+            ? ["На компьютере открой calendar.google.com → Настройки (шестерёнка) → Импорт и экспорт.", "Нажми «Экспорт», скачается .zip-файл.", "Выбери этот файл здесь. Распаковывать не нужно: события на 14 дней вперёд сразу встанут в план."]
+            : ["On a computer open calendar.google.com → Settings (the gear) → Import & export.", "Press «Export»: a .zip file downloads.", "Pick that file here, no need to unzip it. Events for the next 14 days go straight into the plan."];
+        $("calFileSteps").replaceChildren(...steps.map(t => el("li", "", t)));
+        $("calFileBtn").textContent = T("Choose calendar file", "Выбрать файл календаря");
+
         $("calRemove").hidden = !n;
-        $("calRemove").textContent = T(`Remove imported (${n})`, `Убрать импортированные (${n})`);
-        const msg = lastMsg || (state.gcalSync ? T("Last sync: ", "Последняя синхронизация: ") + new Date(state.gcalSync).toLocaleString(isRu() ? "ru-RU" : "en-GB") : state.gcalImported ? T("Last import: ", "Последний импорт: ") + new Date(state.gcalImported).toLocaleString(isRu() ? "ru-RU" : "en-GB") : "");
-        $("calMsg").textContent = msg;
+        $("calRemove").textContent = T(`Remove imported events (${n})`, `Убрать импортированные события (${n})`);
+        $("calMsg").textContent = lastMsg;
     }
+
+    // the calendar window
+    const calVeil = $("calVeil");
+    let calBack = null;
+    function openCal() {
+        calBack = document.activeElement;
+        renderCal();
+        calVeil.hidden = false;
+        document.body.classList.add("auth-open");
+        setTimeout(() => { const b = $("calStepSync").hidden ? $("icsButton") : $("calGoogle"); b && b.focus(); }, 30);
+    }
+    function closeCal() {
+        calVeil.hidden = true;
+        document.body.classList.remove("auth-open");
+        if (calBack && calBack.focus) calBack.focus();
+    }
+    document.addEventListener("click", e => {
+        if (e.target.closest("#calBtn, #calPill, #calOpenSettings")) openCal();
+        else if (e.target.closest("#calClose")) closeCal();
+    });
+    calVeil.addEventListener("mousedown", e => { if (e.target === calVeil) closeCal(); });
+    document.addEventListener("keydown", e => { if (!calVeil.hidden && e.key === "Escape") { e.preventDefault(); closeCal(); } });
 
     const origRender = render;
     render = function () {
         origRender.apply(this, arguments);
         try { renderToday(); renderBadges(); renderTips(); renderCal(); } catch (e) { console.error(e); }
+        document.querySelectorAll(".lm-plan .task").forEach(row => {
+            const c = row.querySelector(".check input"), t = c && state.tasks.find(x => x.id === Number(c.dataset.id)), sm = row.querySelector("small");
+            if (t && (t.src === "gcal" || t.src === "ics") && sm && !sm.dataset.cal) { sm.dataset.cal = "1"; sm.textContent += " · Google"; }
+        });
         document.querySelectorAll(".task-row").forEach(row => {
             const id = Number((row.querySelector("input[data-id]") || {}).dataset?.id), t = state.tasks.find(x => x.id === id);
             if (t && (t.src === "gcal" || t.src === "ics") && !row.querySelector(".lm-src")) row.querySelector(".task-name span").append(el("em", "lm-src", " · Google"));

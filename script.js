@@ -619,7 +619,7 @@ function render() {
     $("taskList").replaceChildren(...state.tasks.slice().sort((a, b) => (a.done - b.done) || (a.due || "9").localeCompare(b.due || "9")).map(t => {
         const row = document.createElement("div");
         row.className = "task-row" + (t.done ? " done" : "");
-        row.innerHTML = `<input type="checkbox" data-id="${t.id}"><div class="task-name"><span></span><small></small></div><a class="cal-link" target="_blank" rel="noopener" title="Add to Google Calendar" aria-label="Add to Google Calendar">+ Cal</a><button class="icon-btn small" data-later="${t.id}" title="Move to the next day" aria-label="Move to the next day">→</button><button class="icon-btn" data-del="${t.id}" title="Delete" aria-label="Delete task">×</button>`;
+        row.innerHTML = `<input type="checkbox" data-id="${t.id}"><div class="task-name"><span></span><small></small></div><a class="cal-link" target="_blank" rel="noopener" title="Add to Google Calendar" aria-label="Add to Google Calendar">+ Calendar</a><button class="icon-btn small" data-later="${t.id}" title="Move to the next day" aria-label="Move to the next day">→</button><button class="icon-btn" data-del="${t.id}" title="Delete" aria-label="Delete task">×</button>`;
         row.querySelector("input").checked = t.done;
         row.querySelector("span").textContent = t.title;
         if (t.prio) row.querySelector("span").prepend(prioBadge(t.prio));
