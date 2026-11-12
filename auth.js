@@ -31,7 +31,8 @@ const SUPABASE_KEY = "sb_publishable_SwG_2MiHBgK5jp00zQPuYw_FPgMq5T_";
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     api.configured = true;
-    api.token = async () => { try { const { data } = await sb.auth.getSession(); return data.session ? data.session.access_token : null; } catch (e) { return null; } };
+    api.client = sb; // feedback.js sends feedback through it
+    api.token =async () => { try { const { data } = await sb.auth.getSession(); return data.session ? data.session.access_token : null; } catch (e) { return null; } };
     btn.hidden = false;
 
     // sync: last change wins. Local edits are uploaded a moment after they happen.

@@ -72,3 +72,26 @@ end $$;
 
 revoke execute on function public.use_ai(int) from public, anon;
 grant execute on function public.use_ai(int) to authenticated;
+
+-- 3. Feedback from the «Feedback» button in the app. Anyone can send it, with or without an account,
+--    but nobody can read it through the app. Read it in Supabase -> Table Editor -> feedback.
+create table if not exists public.feedback (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  user_id uuid default auth.uid() references auth.users (id) on delete set null,
+  kind text check (kind in ('bug', 'idea', 'like', 'other')),
+  message text not null check (char_length(btrim(message)) between 1 and 4000),
+  contact text check (char_length(contact) <= 200),
+  lang text check (lang in ('en', 'ru')),
+  page text check (char_length(page) <= 40)
+);
+
+alter table public.feedback enable row level security;
+
+drop policy if exists "feedback: send" on public.feedback;
+create policy "feedback: send" on public.feedback
+  for insert to anon, authenticated
+  with check (user_id is not distinct from (select auth.uid()));
+
+revoke all on public.feedback from anon, authenticated;
+grant insert on public.feedback to anon, authenticated;
