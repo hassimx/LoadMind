@@ -68,6 +68,8 @@ I want to find out how loaded students of different grades are, for example whet
 
 supabase/research.sql compares the groups: minutes in the app and in focus per day, the average overload, the share of red days and the link between social media and focus. It shows only totals, leaves out groups of fewer than 3 people and users with less than 3 days in the app.
 
+To see how many people use LoadMind at all, guests included, stats.js sends a short anonymous count for each day: a random id made in the browser, minutes in the app and in focus, how many tasks were added, the overload index, grade and social media if answered, whether it is a phone, whether the sign in window was opened and the link the person first came from (loadmind.dev/?from=telegram). No email, name or task text. supabase/usage.sql creates the table, which the site can only write to through one function, and has queries for people per day, sources and returning users.
+
 ## How it works
 
 It is a plain web page with no build step. The markup is in index.html. script.js has the task parser, the planner, the overload index, the week view, the reminders and the calendar export. pomodoro.js is the focus timer. auth.js is sign up, sign in and syncing with the database. extras.js is the Google Calendar import and sync, the streak, levels, achievements and the lifehacks. today.js is editing a task, the list of what is done today and the first line for new users. research.js counts the time in the app, logs the daily overload index and asks for the grade. manifest.webmanifest and icons/ let it be added to a phone home screen. ui.js handles the language switch, the quote of the day and the background, and style.css has the look.
@@ -80,7 +82,7 @@ Open index.html in your browser. There is nothing to install. Without Supabase s
 
 To run your own copy with accounts:
 
-1. Create a Supabase project and run supabase/schema.sql in its SQL Editor.
+1. Create a Supabase project and run supabase/schema.sql and supabase/usage.sql in its SQL Editor.
 2. Put the project URL and the publishable key into the top of auth.js.
 3. Deploy worker.js as a Cloudflare Worker with the variables listed at the top of the file, and put its URL into AI_PROXY in script.js.
 
