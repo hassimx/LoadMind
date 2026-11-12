@@ -788,12 +788,12 @@ $("resetButton").addEventListener("click", () => {
 // appearance: theme + accent color
 
 const PRESETS = [
+    { name: "Blue", hex: "#2f4bff" },
     { name: "Lavender", hex: "#b9a7f5" },
-    { name: "Rose", hex: "#f2a7c3" },
-    { name: "Peach", hex: "#f5b49a" },
-    { name: "Butter", hex: "#ecd68a" },
-    { name: "Mint", hex: "#9fddc0" },
-    { name: "Sky", hex: "#9cc7f5" }
+    { name: "Coral", hex: "#ff6b4a" },
+    { name: "Green", hex: "#1fa971" },
+    { name: "Pink", hex: "#e8579b" },
+    { name: "Amber", hex: "#f0a020" }
 ];
 
 function syncAppearance() {

@@ -144,7 +144,7 @@
 
     /* background styles (Settings -> Background) */
     let look = {}; try { look = JSON.parse(localStorage.getItem("loadmind.look")) || {}; } catch (e) {}
-    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "network"; look.cur = look.cur || "custom";
+    look.bg = ["network", "lines", "off"].includes(look.bg) ? look.bg : "off"; look.cur = look.cur || "standard";
     const saveLook = () => localStorage.setItem("loadmind.look", JSON.stringify(look));
     const applyCur = () => root.classList.toggle("std", look.cur === "standard");
     applyCur();
