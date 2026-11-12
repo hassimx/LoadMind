@@ -54,14 +54,29 @@ create policy "ai_usage: read own" on public.ai_usage
 
 grant select on public.ai_usage to authenticated;
 
--- adds one request for the signed-in user and returns how many are left today (below 0 = limit reached)
-create or replace function public.use_ai(daily_limit int default 30)
+-- adds one request for the signed-in user and returns how many are left today (below 0 = limit reached).
+-- Besides the per-user limit there is one limit for the whole site, so many new accounts can't run up the AI bill.
+drop function if exists public.use_ai(int);
+create or replace function public.use_ai(daily_limit int default 30, total_limit int default 1500)
 returns int language plpgsql security definer set search_path = '' as $$
 declare
   n int;
+  total int;
 begin
   if auth.uid() is null then
     raise exception 'not signed in';
+  end if;
+  -- anyone signed in can call this, so the limits can only be lowered from outside, never raised
+  daily_limit := least(greatest(daily_limit, 1), 50);
+  total_limit := least(greatest(total_limit, 1), 1500);
+  -- already at the limit: refuse without counting, so refused tries don't fill up the site total
+  select u.count into n from public.ai_usage u where u.user_id = auth.uid() and u.day = current_date;
+  if coalesce(n, 0) >= daily_limit then
+    return -1;
+  end if;
+  select coalesce(sum(u.count), 0) into total from public.ai_usage u where u.day = current_date;
+  if total >= total_limit then
+    return -1;
   end if;
   insert into public.ai_usage as u (user_id, day, count)
   values (auth.uid(), current_date, 1)
@@ -69,9 +84,9 @@ begin
   returning u.count into n;
   return daily_limit - n;
 end $$;
-
-revoke execute on function public.use_ai(int) from public, anon;
-grant execute on function public.use_ai(int) to authenticated;
+revoke execute on function public.use_ai(int, int) from public, anon;
+grant execute on function public.use_ai(int, int) to authenticated;
+create index if not exists ai_usage_day on public.ai_usage (day);
 
 -- 3. Feedback from the «Feedback» button in the app. Anyone can send it, with or without an account,
 --    but nobody can read it through the app. Read it in Supabase -> Table Editor -> feedback.
@@ -95,3 +110,22 @@ create policy "feedback: send" on public.feedback
 
 revoke all on public.feedback from anon, authenticated;
 grant insert on public.feedback to anon, authenticated;
+
+-- at most 30 messages an hour from everyone together and 5 an hour from one account, so the form can't be used for spam
+create or replace function public.feedback_rate_limit()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if (select count(*) from public.feedback f where f.created_at > now() - interval '1 hour') >= 30 then
+    raise exception 'feedback limit';
+  end if;
+  if new.user_id is not null and (select count(*) from public.feedback f
+      where f.user_id = new.user_id and f.created_at > now() - interval '1 hour') >= 5 then
+    raise exception 'feedback limit';
+  end if;
+  return new;
+end $$;
+revoke execute on function public.feedback_rate_limit() from public, anon, authenticated;
+drop trigger if exists feedback_limit on public.feedback;
+create trigger feedback_limit before insert on public.feedback
+  for each row execute function public.feedback_rate_limit();
+create index if not exists feedback_created on public.feedback (created_at);

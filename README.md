@@ -41,7 +41,7 @@ On a phone the menu sits at the bottom of the screen, and LoadMind can be added 
 
 You can use LoadMind as a guest, and then everything stays in your browser. If you create an account (email and password), your tasks, settings and focus history are saved to the database and sync between your phone and laptop. When you sign in on a device that already has tasks, LoadMind asks whether to add them to your account. Signing out clears the data from that browser, so it is safe on a shared computer.
 
-Berry's chat and the other AI features work for signed-in users. Each account has a daily limit of AI requests.
+Berry's chat and the other AI features work for signed-in users. Each account has a daily limit of AI requests, the whole site has one too, and answers have a length limit.
 
 ### Planning tools
 

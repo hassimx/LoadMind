@@ -83,7 +83,10 @@
         if (error) {
             console.error(error);
             paint();
-            msg(T("Couldn't send. Check the internet and try again.", "Не получилось отправить. Проверь интернет и попробуй ещё раз."), true);
+            // the database takes at most a few messages an hour, so the form can't be used for spam
+            msg(/feedback limit/i.test(error.message || "")
+                ? T("Too many messages in the last hour. Please try again a bit later.", "За последний час пришло слишком много отзывов. Попробуй чуть позже.")
+                : T("Couldn't send. Check the internet and try again.", "Не получилось отправить. Проверь интернет и попробуй ещё раз."), true);
             return;
         }
         sent = true;

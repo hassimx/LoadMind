@@ -6,7 +6,8 @@
 //   SUPABASE_KEY      (text)    publishable key (sb_publishable_...), the same one the site uses
 //   OPENROUTER_MODEL  (text, optional)  default google/gemini-3.8-flash
 //   GEMINI_MODEL      (text, optional)  default gemini-3.8-flash
-//   AI_DAILY_LIMIT    (text, optional)  AI requests per user per day, default 30
+//   AI_DAILY_LIMIT    (text, optional)  AI requests per user per day, default 30 (the database allows at most 50)
+//   AI_MAX_TOKENS     (text, optional)  longest AI answer in tokens, default 2048
 //   ALLOWED_ORIGIN    (text, optional)  your site URLs, comma separated
 export default {
   async fetch(req, env) {
@@ -23,7 +24,8 @@ export default {
     const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim();
     if (!token) return reply({ error: "Sign in to use the AI" }, 401);
 
-    // 2. count the request against the user's daily limit (the database checks the token)
+    // 2. count the request against the user's daily limit (the database checks the token).
+    //    The database also keeps one limit for the whole site (1500 a day), so new accounts can't run up the bill.
     const limit = Math.max(1, parseInt(env.AI_DAILY_LIMIT, 10) || 30);
     let left;
     try {
@@ -38,7 +40,7 @@ export default {
     } catch {
       return reply({ error: "Account check failed" }, 502);
     }
-    if (!(left >= 0)) return reply({ error: `Daily AI limit reached (${limit} requests). It resets at midnight UTC.` }, 429);
+    if (!(left >= 0)) return reply({ error: `Today's AI limit is reached (${limit} requests a day). It resets at midnight UTC.` }, 429);
 
     // 3. ask the AI: OpenRouter (paid) first, then Google directly (free tier)
     let body;
@@ -46,6 +48,7 @@ export default {
     const system = String(body.system || "").slice(0, 2000);
     const user = String(body.user || "").slice(0, 6000); // size limit protects your budget
     if (!user) return reply({ error: "Empty request" }, 400);
+    const maxTokens = Math.min(4096, Math.max(256, parseInt(env.AI_MAX_TOKENS, 10) || 2048)); // the answer is capped too
 
     let error = "AI error", status = 502;
     if (env.OPENROUTER_KEY) {
@@ -53,7 +56,7 @@ export default {
         const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: { "content-type": "application/json", authorization: `Bearer ${env.OPENROUTER_KEY}`, "HTTP-Referer": "https://loadmind.dev", "X-Title": "LoadMind" },
-          body: JSON.stringify({ model: env.OPENROUTER_MODEL || "google/gemini-3.8-flash", messages: [{ role: "system", content: system }, { role: "user", content: user }] })
+          body: JSON.stringify({ model: env.OPENROUTER_MODEL || "google/gemini-3.8-flash", messages: [{ role: "system", content: system }, { role: "user", content: user }], max_tokens: maxTokens })
         });
         const data = await r.json().catch(() => ({}));
         const text = String(data.choices?.[0]?.message?.content || "").trim();
@@ -70,7 +73,7 @@ export default {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_KEY },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts: [{ text: user }] }] })
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts: [{ text: user }] }], generationConfig: { maxOutputTokens: maxTokens } })
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) return reply({ error: data.error?.message || error }, r.status === 429 ? 429 : 502);
