@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20261112b">
-    <link rel="stylesheet" href="design.css?v=20261112h">
+    <link rel="stylesheet" href="design.css?v=20261112j">
 
     <script>
     /* one address for everyone: the old workers.dev address moves to loadmind.dev, so sign-ins and data stay in one place */
@@ -208,15 +208,20 @@
             <button class="link-btn lm-tip-next" type="button"></button>
         </section>
 
-        <section class="block coach" data-views="dashboard">
-            <div class="coach-head">
+        <section class="block coach berry-card" data-views="dashboard" data-notr>
+            <div class="berry-card-row">
+                <div class="berry-card-ava" id="berryCardAva" aria-hidden="true"></div>
                 <div>
-                    <h2>LoadMind Coach</h2>
-                    <p class="hint">Looks at your day and suggests what to change.</p>
+                    <h2 id="berryHead">Berry</h2>
+                    <p class="hint" id="berryText"></p>
+                    <div class="row-actions">
+                        <button class="primary-button" id="berryOpen" type="button">Talk to Berry</button>
+                        <button class="secondary-button" id="berryDay" type="button">Look at my day</button>
+                    </div>
                 </div>
-                <button class="secondary-button" id="coachButton" type="button">Get insight</button>
             </div>
-            <p class="coach-out" id="coachOut"></p>
+            <button id="coachButton" type="button" hidden></button>
+            <p class="coach-out" id="coachOut" hidden></p>
         </section>
 
         <section class="block" data-views="dashboard">
@@ -473,6 +478,22 @@
         </div>
     </div>
 
+    <div class="berry-chat" id="berryChat" data-notr hidden role="dialog" aria-labelledby="berryChatName">
+        <div class="bc-head">
+            <div class="bc-ava" id="bcAva"></div>
+            <div class="bc-who"><b id="berryChatName">Berry</b><small id="bcSub"></small></div>
+            <button class="link-btn" id="bcClear" type="button"></button>
+            <button class="icon-btn" id="bcClose" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="bc-log" id="bcLog" aria-live="polite"></div>
+        <div class="bc-starts" id="bcStarts"></div>
+        <form class="bc-form" id="bcForm">
+            <textarea id="bcText" rows="1" maxlength="1500" aria-label="Message"></textarea>
+            <button class="primary-button" id="bcSend" type="submit"></button>
+        </form>
+        <p class="bc-note" id="bcNote"></p>
+    </div>
+
     <div class="auth-veil" id="calVeil" data-notr hidden>
         <div class="auth-box cal-box" id="lmCal" role="dialog" aria-modal="true" aria-labelledby="calHead">
             <button class="icon-btn auth-close" id="calClose" type="button" aria-label="Close">×</button>
@@ -523,7 +544,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js?v=20261112e"></script>
+    <script src="script.js?v=20261112j"></script>
     <script src="auth.js?v=20261112e"></script>
     <script src="pomodoro.js?v=20261112e"></script>
     <script src="extras.js?v=20261112e"></script>
@@ -531,8 +552,9 @@
     <script src="research.js?v=20261112e"></script>
     <script src="feedback.js?v=20261112e"></script>
     <script src="ui.js?v=20261112e"></script>
-    <script src="mascot.js?v=20261112i"></script>
-    <script src="design.js?v=20261112g"></script>
+    <script src="mascot.js?v=20261112k"></script>
+    <script src="berry.js?v=20261112k"></script>
+    <script src="design.js?v=20261112j"></script>
 
 </body>
 </html>

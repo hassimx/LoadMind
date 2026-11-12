@@ -719,7 +719,7 @@ $("schedule").addEventListener("click", e => {
     const task = state.tasks.find(t => t.id === Number(e.target.dataset.id));
     if (task) { setDone(task, e.target.checked); save(); render(); }
 });
-$("coachButton").addEventListener("click", askCoach);
+$("coachButton").addEventListener("click", () => window.LoadMindBerry ? LoadMindBerry.open("day") : askCoach());  // the coach is Berry now (berry.js)
 $("setProvider").addEventListener("change", e => { state.settings.provider = e.target.value; $("setModel").placeholder = DEFAULT_MODEL.gemini; save(); });
 $("setModel").addEventListener("change", e => { state.settings.model = e.target.value.trim(); save(); });
 $("setKey").addEventListener("change", e => { state.settings.key = e.target.value.trim(); save(); });

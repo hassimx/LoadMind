@@ -46,6 +46,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
 
 <h2>AI features</h2>
 <p>When you press a button that uses AI (the coach, reading your notes, or smart task input), the text needed for that answer, such as task titles, times and your note, is sent through our server to Google Gemini (via OpenRouter) to generate the reply. It is used only to answer that request and is not used to train models by LoadMind. AI features are available only to signed-in users, with a daily limit.</p>
+<p>When you write to Berry (the chat with the blueberry), your message, the last messages of the chat and a short summary of your day (overload index, plan, open tasks and notes) are sent the same way to write the reply. The chat history itself is kept only in your browser, and «Clear» in the chat deletes it.</p>
 
 <h2>Feedback</h2>
 <p>If you send feedback with the «Feedback» button, we save your message, the type you picked, the contact you chose to leave (it is optional), the language and the section of the app you were in, and, if you are signed in, which account sent it. Feedback is read only by the developer of LoadMind, to improve the app, and is never published.</p>
@@ -68,7 +69,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
 <div lang="ru">
 <p>LoadMind хранит твои задачи, заметки и настройки в браузере, а если ты создала аккаунт, то и в базе данных (Supabase), чтобы они синхронизировались между устройствами. Каждый аккаунт видит только свои данные.</p>
 <p>Если ты подключаешь Google Календарь, LoadMind читает события основного календаря на 14 дней вперёд и показывает их как задачи с фиксированным временем, а задачи LoadMind со временем или дедлайном добавляет в Google Календарь. Токен доступа хранится только в текущей сессии браузера и не уходит на наш сервер. Мы не продаём данные Google, не используем их для рекламы и для обучения ИИ. Отозвать доступ можно на myaccount.google.com/permissions.</p>
-<p>Когда ты нажимаешь кнопку с ИИ, нужный для ответа текст отправляется в Google Gemini, только чтобы получить этот ответ. Рекламы и трекеров нет. Чтобы удалить аккаунт и данные, напиши на почту выше.</p>
+<p>Когда ты нажимаешь кнопку с ИИ или пишешь Берри, нужный для ответа текст (твоё сообщение, последние сообщения чата и краткое описание дня) отправляется в Google Gemini, только чтобы получить этот ответ. Сама переписка с Берри хранится только в твоём браузере, кнопка «Очистить» её удаляет. Рекламы и трекеров нет. Чтобы удалить аккаунт и данные, напиши на почту выше.</p>
 <p>Для исследования нагрузки школьников LoadMind считает, сколько минут в день ты проводишь в приложении (только пока страница открыта и ты ею пользуешься), сохраняет индекс перегрузки за каждый день, а также класс и примерное время в соцсетях, если ты сама захочешь ответить (это можно пропустить или поменять в настройках). Смотрятся только общие цифры по всем пользователям, данные одного человека никто не смотрит, а группы меньше 3 человек не учитываются.</p>
 <p>Если ты отправляешь отзыв кнопкой «Отзыв», сохраняются его текст, выбранный тип, контакт (если ты его указала), язык и раздел приложения, а если ты в аккаунте, то и с какого аккаунта он отправлен. Отзывы читает только разработчик LoadMind, чтобы улучшать приложение, и они нигде не публикуются.</p>
 </div>

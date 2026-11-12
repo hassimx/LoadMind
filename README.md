@@ -29,6 +29,10 @@ Events from Google Calendar come into LoadMind as tasks with a fixed time, so th
 - A weekly recap compares this week with the last one, and a welcome-back line appears after a break.
 - A study lifehack of the day (memory, focus, sleep, exams, planning), plus a tip that reacts to your day: an overloaded day, a deadline within 24 hours, or a late hour.
 
+### Berry
+
+Berry is the LoadMind blueberry. He sits next to the overload index and shows how heavy the day is: calm on a light day, worried and sweating when it is overloaded, asleep when nothing is planned, and he jumps when you tick a task off. On the other sections a small Berry peeks from the corner and walks about. Tap him to talk: he can look at your day and say what to change (he took over from the AI coach), help with studying, or just listen when you feel sad or lonely. If someone writes that they are in danger, the chat shows the 150 helpline and 112 straight away. The chat history stays in the browser.
+
 ### On a phone
 
 On a phone the menu sits at the bottom of the screen, and LoadMind can be added to the home screen (Share → Add to Home Screen on iPhone, ⋮ → Add to Home screen on Android). It then opens like an app, with its own icon and without the browser bar.
@@ -37,7 +41,7 @@ On a phone the menu sits at the bottom of the screen, and LoadMind can be added 
 
 You can use LoadMind as a guest, and then everything stays in your browser. If you create an account (email and password), your tasks, settings and focus history are saved to the database and sync between your phone and laptop. When you sign in on a device that already has tasks, LoadMind asks whether to add them to your account. Signing out clears the data from that browser, so it is safe on a shared computer.
 
-The AI coach works for signed-in users. Each account has a daily limit of AI requests.
+Berry's chat and the other AI features work for signed-in users. Each account has a daily limit of AI requests.
 
 ### Planning tools
 

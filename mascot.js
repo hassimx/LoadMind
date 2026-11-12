@@ -1,4 +1,5 @@
-/* Loady, the LoadMind character: a small pixel blueberry that shows how heavy the day is.
+/* Berry (Берри), the LoadMind character: a small pixel blueberry that shows how heavy the day is.
+   Tap him to talk (berry.js); he also lives in the corner of every section and wanders about a bit.
    It breathes and blinks, gets worried and sweats when the day is overloaded, sleeps when there is nothing
    to do, and jumps when a task is done. Drawn as SVG squares, coloured with the accent colour. */
 (function () {
@@ -30,6 +31,7 @@
         squeeze: [[6, 9], [7, 10], [8, 11], [7, 12], [6, 13], [19, 9], [18, 10], [17, 11], [18, 12], [19, 13]],
         down: [...open(7), ...open(16)].map(([x, y, w]) => [x, y + 1, w]),
         sleepy: [[6, 11], [7, 11], [8, 11], [9, 11], [7, 12], [8, 12], [15, 11], [16, 11], [17, 11], [18, 11], [16, 12], [17, 12]],
+        up: [...open(7), ...open(16)].map(([x, y, w]) => [x, y - 1, w]),
         dizzy: [7, 16].flatMap(x => [[x, 9], [x + 1, 9], [x - 1, 10], [x + 2, 10], [x - 1, 11], [x + 2, 11], [x, 12], [x + 1, 12], [x + 1, 11]]),
     };
     const MOUTH = {
@@ -49,10 +51,12 @@
         happy: { eyes: "happy", mouth: "big", stars: true, say: ["Done! One less", "Готово! Минус одна"] },
         eat: { eyes: "happy", mouth: "o", say: ["Yum! It's in the plan", "Ням! Задача в плане"] },
         listen: { eyes: "down", mouth: "small", say: ["Writing it down…", "Записываю…"] },
-        focus: { eyes: "down", mouth: "flat", say: ["Shh… I'm focusing too", "Тсс… я тоже сосредоточилась"] },
+        focus: { eyes: "down", mouth: "flat", say: ["Shh… I'm focusing too", "Тсс… я тоже сосредоточился"] },
         rest: { eyes: "happy", mouth: "smile", say: ["Break! Stretch and drink some water", "Перерыв! Потянись и попей воды"] },
         sleepy: { eyes: "sleepy", mouth: "small", say: ["It's late. Sleep is part of the plan too", "Уже поздно. Сон тоже часть плана"] },
         dizzy: { eyes: "dizzy", mouth: "wave", say: ["Whoa, my head is spinning…", "Ой, голова кружится…"] },
+        think: { eyes: "up", mouth: "small", dots: true, say: ["Thinking…", "Думаю…"] },
+        talk: { eyes: "open", mouth: "o", talk: true, say: ["", ""] },
     };
     const LEVEL_MOOD = ["calm", "ok", "busy", "over"];
     const isRuNow = () => typeof isRu === "function" && isRu();
@@ -67,14 +71,16 @@
         body += SPROUT.map(([x, y, c]) => rect(x, y, c)).join("");
         const blink = m.eyes === "open" || m.eyes === "down";
         const face = `<g class="l-look"><g class="l-eyes${blink ? " blinkable" : ""}">${dots(EYES[m.eyes], "lk")}</g>`
-            + (blink ? `<g class="l-blink">${dots(EYES.closed.map(([x, y]) => [x, y + (m.eyes === "down" ? 1 : 0)]), "lk")}</g>` : "") + `</g>` + dots(MOUTH[m.mouth], "lk");
+            + (blink ? `<g class="l-blink">${dots(EYES.closed.map(([x, y]) => [x, y + (m.eyes === "down" ? 1 : 0)]), "lk")}</g>` : "") + `</g>`
+            + (m.talk ? `<g class="l-mA">${dots(MOUTH.o, "lk")}</g><g class="l-mB">${dots(MOUTH.smile, "lk")}</g>` : dots(MOUTH[m.mouth], "lk"));
         let extra = "";
         if (m.sweat) extra += `<g class="l-sweat">${dots([[23, 6], [23, 7], [24, 7], [23, 8], [24, 8]], "ls")}</g>`;
         if (m.sweat > 1) extra += `<g class="l-sweat l-sweat2">${dots([[1, 8], [1, 9], [0, 9], [1, 10], [0, 10]], "ls")}</g>`;
         if (m.steam) extra += `<g class="l-steam">${dots([[5, -1], [6, -2], [5, -3], [19, -1], [20, -2], [19, -3]], "lst")}</g>`;
         if (m.zzz) extra += `<g class="l-zzz">${dots([[20, -5], [21, -5], [22, -5], [23, -5], [22, -4], [21, -3], [20, -2], [21, -2], [22, -2], [23, -2]], "lk")}</g>`;
+        if (m.dots) extra += `<g class="l-dots">${dots([[22, -3], [25, -3], [28, -3]], "lk")}</g>`;
         if (m.stars) extra += `<g class="l-stars">${dots([[26, 2], [25, 3], [26, 3], [27, 3], [26, 4], [-2, 7], [-3, 8], [-2, 8], [-1, 8], [-2, 9]], "ly")}</g>`;
-        return `<svg class="loady-svg" viewBox="-4 -6 34 31" shape-rendering="crispEdges" aria-hidden="true"><g class="l-body">${body}${face}</g>${extra}</svg>`;
+        return `<svg class="loady-svg" viewBox="-4 -6 34 31" overflow="visible" shape-rendering="crispEdges" aria-hidden="true"><g class="l-body">${body}${face}</g>${extra}</svg>`;
     }
 
     // one character element: <div class="loady" data-mood="...">
@@ -84,7 +90,7 @@
         el.innerHTML = svg(mood) + (opts.bubble ? `<p class="loady-say" aria-live="polite"></p>` : "");
         el.dataset.mood = mood;
         if (opts.bubble) el.querySelector(".loady-say").textContent = MOODS[mood].say[isRuNow() ? 1 : 0];
-        if (opts.poke) { el.tabIndex = 0; el.setAttribute("role", "button"); el.setAttribute("aria-label", "Loady"); }
+        if (opts.poke) { el.tabIndex = 0; el.setAttribute("role", "button"); el.setAttribute("aria-label", isRuNow() ? "Берри: поговорить" : "Berry: talk"); }
         return el;
     }
     function set(el, mood, text) {
@@ -104,7 +110,7 @@
     const logo = document.querySelector(".logo");
     if (logo && !logo.querySelector(".loady")) logo.prepend(make("calm", { cls: "loady-logo" }));
 
-    let main = null;                                           // next to the overload index on Today
+    let main = null, mainSeen = true;                          // next to the overload index on Today
     const buddy = make("calm", { cls: "loady-buddy", bubble: true, poke: true }); // peeks from the corner everywhere else
     buddy.hidden = true;
     document.body.append(buddy);
@@ -146,7 +152,7 @@
         }
         if (v === "week") return ["ok", T("See which day of the week is the heaviest", "Смотри, какой день недели самый тяжёлый")];
         if (v === "settings") return ["calm", T("You can repaint me here: Accent colour", "Тут можно меня перекрасить: «Цвет акцента»")];
-        return ["calm"];
+        return [levelMood()];   // on Today he says the same as the big one next to the index
     }
     let shownView = null;
     function paint() {
@@ -154,11 +160,12 @@
         if (head && !main) {
             main = make(levelMood(), { cls: "loady-main", bubble: true, poke: true });
             head.insertBefore(main, head.querySelector(".score"));
-            wire(main);
+            wire(main, true);
+            if (window.IntersectionObserver) new IntersectionObserver(es => { mainSeen = es[0].isIntersecting; paint(); }).observe(main);
         }
         if (main && !isHeld(main)) set(main, levelMood(), napping ? T("I'll nap until you're back", "Вздремну, пока тебя нет") : null);
         const v = typeof view !== "undefined" ? view : "dashboard";
-        buddy.hidden = v === "dashboard";
+        buddy.hidden = (v === "dashboard" && mainSeen) || document.body.classList.contains("berry-open");
         if (!buddy.hidden && !isHeld(buddy)) { const [m, text] = buddyState(); set(buddy, m, text); }
         if (v !== shownView) { shownView = v; if (!buddy.hidden) talk(buddy); }
         const empty = document.querySelector("#schedule .empty");
@@ -176,7 +183,7 @@
         if (!r.width) return;
         const cx = r.left + r.width * .5, cy = r.top + r.height * .42;
         const dx = Math.abs(px - cx) < r.width * .35 ? 0 : px > cx ? 1 : -1, dy = Math.abs(py - cy) < r.height * .35 ? 0 : py > cy ? 1 : -1;
-        g.setAttribute("transform", `translate(${dx} ${dy})`);
+        g.setAttribute("transform", `translate(${el.dataset.dir === "right" ? -dx : dx} ${dy})`);   // a flipped berry looks the other way
     }
     let lookQueued = false;
     addEventListener("pointermove", e => {
@@ -187,7 +194,7 @@
     // ---------- poke it, pet it, don't spin it ----------
     const POKES = [
         ["Hee-hee, that tickles!", "Хи-хи, щекотно!"], ["I'm here!", "Я тут!"], ["Don't forget to rest", "Не забывай отдыхать"],
-        ["You plan really well", "Ты классно планируешь"], ["I'm a blueberry, not a button :)", "Я черника, а не кнопка :)"],
+        ["You plan really well", "Ты классно планируешь"], ["I'm Berry, not a button :)", "Я Берри, а не кнопка :)"],
         ["One task at a time", "По одной задаче за раз"], ["Drink some water?", "Может, попьёшь воды?"], ["Boop!", "Буп!"],
     ];
     let lastPoke = -1;
@@ -202,9 +209,10 @@
             setTimeout(() => h.remove(), 1400 + i * 120);
         }
     }
-    function wire(el) {
+    function wire(el, opensChat) {
         let taps = [], down = null, petted = 0;
         const poke = () => {
+            if (opensChat && window.LoadMindBerry && !LoadMindBerry.isOpen()) { bump(el, "jump"); LoadMindBerry.open(); return; }
             if (isHeld(el) && el.dataset.mood === "dizzy") return;   // let it recover first
             const now = Date.now();
             taps = taps.filter(t => now - t < 2500).concat(now);
@@ -223,7 +231,7 @@
         addEventListener("pointerup", () => { if (down && down.moved < 12) poke(); down = null; });
         el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); poke(); } });
     }
-    wire(buddy);
+    wire(buddy, true);
     buddy.addEventListener("mouseenter", () => talk(buddy, 2600));
 
     // ---------- it follows what you do ----------
@@ -265,5 +273,31 @@
     document.querySelector(".lang") && document.querySelector(".lang").addEventListener("click", () => setTimeout(() => { [main, buddy].forEach(el => el && (el.dataset.lang = "")); paint(); }));
     paint();
 
-    window.LoadMindLoady = { make, set };
+    // ---------- he walks around a little ----------
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let bx = 0;
+    function wander() {
+        if (still || buddy.hidden || buddy.classList.contains("talk") || napping || isHeld(buddy)) return;
+        const range = innerWidth < 640 ? 150 : Math.min(420, innerWidth * .33);
+        let to = bx; for (let i = 0; i < 5 && Math.abs(to - bx) < 50; i++) to = Math.round(Math.random() * range);
+        const dist = Math.abs(to - bx), ms = Math.max(700, dist * 6);
+        buddy.dataset.dir = to > bx ? "left" : "right";   // he walks to the left when the offset grows
+        buddy.style.setProperty("--walk", ms + "ms");
+        buddy.classList.add("walk");
+        bx = to; buddy.style.setProperty("--bx", -to + "px");
+        clearTimeout(buddy._w); buddy._w = setTimeout(() => {
+            buddy.classList.remove("walk");
+            if (Math.random() < .35) bump(buddy, "jump");
+            else if (Math.random() < .5) hold(buddy, buddy.dataset.mood === "calm" ? "happy" : buddy.dataset.mood, null, 900);
+        }, ms);
+    }
+    setInterval(wander, 8000);
+    // and looks around when you're not moving the mouse
+    setInterval(() => {
+        if (still || Date.now() - lastAct < 4000) return;
+        [main, buddy].forEach(el => { const g = el && el.querySelector(".l-look"); if (g) g.setAttribute("transform", `translate(${[-1, 0, 1][Math.random() * 3 | 0]} 0)`); });
+    }, 2600);
+    new MutationObserver(() => paint()).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+    window.LoadMindLoady = { make, set, hold, bump, hearts, wire: (el, opensChat) => wire(el, !!opensChat) };
 })();
