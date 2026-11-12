@@ -99,7 +99,8 @@
     document.fonts && document.fonts.ready.then(() => movePill(true));
     movePill(true);
 
-    // switching sections: a quick pixel dissolve, like an old game screen
+    // switching sections: a soft pixel shimmer. A light tint of the accent, a third of the screen at most,
+    // each square fading out on its own, so it reads as a sparkle rather than a flash.
     const cv = document.createElement("canvas");
     cv.className = "lm-pix";
     cv.setAttribute("aria-hidden", "true");
@@ -108,24 +109,29 @@
     let anim = 0;
     function dissolve() {
         if (still) return;
-        const W = innerWidth, H = innerHeight, S = W < 640 ? 14 : 18;
+        const W = innerWidth, H = innerHeight, S = W < 640 ? 12 : 16;
         cv.width = W; cv.height = H;
-        const cols = Math.ceil(W / S), rows = Math.ceil(H / S), n = cols * rows;
-        const order = Array.from({ length: n }, (_, i) => i);
-        for (let i = n - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [order[i], order[j]] = [order[j], order[i]]; }
+        const cols = Math.ceil(W / S), rows = Math.ceil(H / S);
+        const dark = document.documentElement.dataset.theme === "dark";
         const color = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2f4bff";
-        const IN = 150, OUT = 330, t0 = performance.now(), id = ++anim;
+        // about a third of the squares, each with its own start and a short life
+        const cells = [];
+        for (let i = 0; i < cols * rows; i++) if (Math.random() < .32) cells.push({ x: (i % cols) * S, y: (i / cols | 0) * S, at: Math.random() * 160, life: 180 + Math.random() * 160 });
+        const END = 520, PEAK = dark ? .22 : .16, t0 = performance.now(), id = ++anim;
         cv.style.display = "block";
+        cx.fillStyle = color;
         (function frame(now) {
             if (id !== anim) return;
             const t = now - t0;
             cx.clearRect(0, 0, W, H);
-            // first the squares pop in (up to about half of the screen), then they go away in the same random order
-            const on = Math.min(1, t / IN) * .55, off = Math.max(0, Math.min(1, (t - IN) / OUT));
-            const first = Math.floor(off * n * .55), last = Math.floor(on * n);
-            cx.fillStyle = color;
-            for (let i = first; i < last; i++) { const c = order[i]; cx.fillRect((c % cols) * S, (c / cols | 0) * S, S, S); }
-            if (t < IN + OUT) requestAnimationFrame(frame); else { cx.clearRect(0, 0, W, H); cv.style.display = "none"; }
+            for (const c of cells) {
+                const k = (t - c.at) / c.life;
+                if (k <= 0 || k >= 1) continue;
+                cx.globalAlpha = PEAK * Math.sin(Math.PI * k);   // fades in and out
+                cx.fillRect(c.x + 1, c.y + 1, S - 2, S - 2);
+            }
+            cx.globalAlpha = 1;
+            if (t < END) requestAnimationFrame(frame); else { cx.clearRect(0, 0, W, H); cv.style.display = "none"; }
         })(t0);
     }
     if (typeof showView === "function") {
